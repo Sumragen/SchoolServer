@@ -1,6 +1,8 @@
 /**
  * Created by trainee on 6/3/16.
  */
+var _ = require('lodash');
+
 function randomWord(strLengt) {
     var text = "";
     var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -91,47 +93,56 @@ var source = {
                 password: 'student',
                 roles: [student]
             }
-        ]
+        ],
+        lastIndex : 3
     }
 };
-
-function login(response, request) {
-    var tempUser = body;
+var defaultHeader = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Origin': '*'
+};
+function login(request, response) {
     var result = null;
-    //if (_.every(source.user.objects, function (user) {
-    //        if (tempUser.username.toLowerCase() === user.username.toLowerCase() || tempUser.username.toLowerCase() === user.email.toLowerCase()) {
-    //            if (tempUser.password === user.password) {
-    //                result = angular.copy(user);
-    //                delete result.password;
-    //            } else {
-    //                if (!user.password) {
-    //                    result = {error: 'User without password. Please, sign in with social network and set your password in profile settings page.'}
-    //                } else {
-    //                    return true;
-    //                }
-    //            }
-    //            return false;
-    //        }
-    //        return true;
-    //    })) {
-    //    result = {error: 'Username or password is incorrect'};
-    //}
+    var tempUser = request.body;
+    if (_.every(source.user.objects, function (user) {
+            if (tempUser.username.toLowerCase() === user.username.toLowerCase() || tempUser.username.toLowerCase() === user.email.toLowerCase()) {
+                if (tempUser.password === user.password) {
+                    result = user;
+                    delete result.password;
+                } else {
+                    if (!user.password) {
+                        result = {error: 'User without password. Please, sign in with social network and set your password in profile settings page.'}
+                    } else {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            return true;
+        })) {
+        result = {error: 'Username or password is incorrect'};
+    }
 
+    if (!result.error) {
+        response.writeHead(200, defaultHeader);
+        response.write(JSON.stringify({currentUser: result, sessionToken: 'simple sessionToken'}));
+    } else {
+        response.writeHead(404, defaultHeader);
+        response.write(JSON.stringify({message: result.error}));
+    }
+    response.end();
+}
 
-    response.writeHead(200, {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Origin': '*'
-    });
-    var user = {
-        id: 1,
-        first_name: 'Eric',
-        last_name: 'Tituashvili',
-        username: 'admin',
-        email: 'Davidich@smotra.ru'
-    };
-    response.write(JSON.stringify({currentUser: user, sessionToken: 'simple sessionToken'}));
+function register(request, response){
+    var user = request.body;
+    user.id = ++source.user.lastIndex;
+    user.roles = [student];
+    source.user.objects.push(user);
+    response.writeHead(200, defaultHeader);
+    response.write(JSON.stringify(user));
     response.end();
 }
 
 exports.login = login;
+exports.register = register;

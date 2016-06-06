@@ -6,7 +6,8 @@ var path = require('path'),
     http = require('http'),
     express = require('express'),
     app = express(),
-    bodyParser = require('body-parser');
+    bodyParser = require('body-parser'),
+    router = require('./router');
 
 var port = 3000; //must be in configs
 var host = 'localhost';
@@ -19,21 +20,8 @@ app.use(function (req, res, next) {
     next();
 });
 
-app.get('/api', function (req, res) {
-    res.send('hello api');
-});
-app.post('/api/login', function (req, res) {
-    console.log('/api/login');
-    var user = req.body;
-    res.send({user: user, sessionToken: 'some token'})
-});
-app.get('/', function (req, res) {
-    res.send('hello');
-});
+router.initRoutes(app);
 
-function onRequest() {
-    console.log('request');
-}
 http.createServer(app).listen(port, host, function () {
     console.log('Listening ' + host + ':' + port);
 });
