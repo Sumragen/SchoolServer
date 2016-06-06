@@ -39,7 +39,6 @@ var permissionSet = {
     'canDeleteEvents': 0x00e
 };
 
-var data = {};
 var p = permissionSet;
 var admin = {
     id: 1,

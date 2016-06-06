@@ -7,10 +7,11 @@ var path = require('path'),
     express = require('express'),
     app = express(),
     bodyParser = require('body-parser'),
-    router = require('./router');
+    router = require('./router'),
+    config = require('./config');
 
-var port = 3000; //must be in configs
-var host = 'localhost';
+var port = config.port;
+var host = config.host;
 
 //configure
 app.use(bodyParser.json());
