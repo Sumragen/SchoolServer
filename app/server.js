@@ -8,10 +8,10 @@ var path = require('path'),
     app = express(),
     bodyParser = require('body-parser'),
     router = require('./router'),
-    config = require('./config');
+    config = require('./libs/config');
 
-var port = config.port;
-var host = config.host;
+var port = config.get('port');
+var host = config.get('host');
 
 //configure
 app.use(bodyParser.json());
