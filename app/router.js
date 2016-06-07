@@ -1,7 +1,9 @@
 /**
  * Created by trainee on 6/6/16.
  */
-var db = require('./data/source');
+var db = require('./data/source'),
+    auth = require('./endpoint/auth');
+
 
 function initRoutes(app){
     app.post('/api/login', function (req, res) {

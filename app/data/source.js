@@ -1,7 +1,9 @@
 /**
  * Created by trainee on 6/3/16.
  */
-var _ = require('lodash');
+var _ = require('lodash'),
+    log = require('./../libs/log')(module),
+    UserModel = require('./../libs/mongoose').UserModel;
 
 function randomWord(strLengt) {
     var text = "";
@@ -93,7 +95,7 @@ var source = {
                 roles: [student]
             }
         ],
-        lastIndex : 3
+        lastIndex: 3
     }
 };
 var defaultHeader = {
@@ -104,23 +106,28 @@ var defaultHeader = {
 function login(request, response) {
     var result = null;
     var tempUser = request.body;
-    if (_.every(source.user.objects, function (user) {
-            if (tempUser.username.toLowerCase() === user.username.toLowerCase() || tempUser.username.toLowerCase() === user.email.toLowerCase()) {
-                if (tempUser.password === user.password) {
-                    result = user;
-                    delete result.password;
-                } else {
-                    if (!user.password) {
-                        result = {error: 'User without password. Please, sign in with social network and set your password in profile settings page.'}
+    if (Object.getOwnPropertyNames(tempUser).length > 0) {
+        //check is request body empty.
+        if (_.every(source.user.objects, function (user) {
+                if (tempUser.username.toLowerCase() === user.username.toLowerCase() || tempUser.username.toLowerCase() === user.email.toLowerCase()) {
+                    if (tempUser.password === user.password) {
+                        result = _.clone(user);
+                        delete result.password;
                     } else {
-                        return true;
+                        if (!user.password) {
+                            result = {error: 'User without password. Please, sign in with social network and set your password in profile settings page.'}
+                        } else {
+                            return true;
+                        }
                     }
+                    return false;
                 }
-                return false;
-            }
-            return true;
-        })) {
-        result = {error: 'Username or password is incorrect'};
+                return true;
+            })) {
+            result = {error: 'Username or password is incorrect'};
+        }
+    } else {
+        result = {error: 'User data does not found!'};
     }
 
     if (!result.error) {
@@ -133,14 +140,28 @@ function login(request, response) {
     response.end();
 }
 
-function register(request, response){
-    var user = request.body;
+function register(request, response) {
+    var user = new UserModel(request.body);
     user.id = ++source.user.lastIndex;
     user.roles = [student];
-    source.user.objects.push(user);
-    response.writeHead(200, defaultHeader);
-    response.write(JSON.stringify(user));
-    response.end();
+    //source.user.objects.push(user);
+    user.save(function (err) {
+        if (!err) {
+            log.info('User created!');
+            response.writeHead(200, defaultHeader);
+            response.write(JSON.stringify(user));
+        } else {
+            if (err.name == 'ValidationError') {
+                response.statusCode = 400;
+                response.send({error: 'Validation error'});
+            } else {
+                response.statusCode = 500;
+                response.send({error: 'Server error'});
+            }
+            log.error('Internal error(%d): %s', response.statusCode, err.message);
+        }
+        response.end();
+    });
 }
 
 exports.login = login;
