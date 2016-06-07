@@ -1,8 +1,7 @@
 /**
  * Created by trainee on 6/6/16.
  */
-var db = require('./data/source'),
-    auth = require('./endpoint/auth');
+var db = require('./data/source');
 
 
 function initRoutes(app){
