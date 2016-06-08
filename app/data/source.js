@@ -4,7 +4,9 @@
 var _ = require('lodash'),
     libs = process.cwd() + '/app/libs/',
     log = require(libs + 'log')(module),
-    UserModel = require(libs + 'model/user');
+    config = require(libs + 'config'),
+    UserModel = require(libs + 'model/user'),
+    RoleModel = require(libs + 'model/role');
 
 var defaultHeader = {
     'Content-Type': 'application/json',
@@ -18,11 +20,11 @@ function login(request, response) {
             response.write(JSON.stringify(err));
         } else if (user.length <= 0) {
             response.writeHead(404, defaultHeader);
-            response.write(JSON.stringify({message:'User not found'}));
-        } else if(user[0].checkPassword(request.body.password)){
+            response.write(JSON.stringify({message: 'User not found'}));
+        } else if (user[0].checkPassword(request.body.password)) {
             response.writeHead(200, defaultHeader);
             response.write(JSON.stringify({currentUser: user[0].getToClient(), sessionToken: 'simple sessionToken'}));
-        }else{
+        } else {
             response.writeHead(404, defaultHeader);
             response.write('User not found');
         }
@@ -57,24 +59,37 @@ var lastIndex = 3;
 function register(request, response) {
     var user = new UserModel(request.body);
     user.id = ++lastIndex;
-    user.roles = [student];
-    //source.user.objects.push(user);
-    user.save(function (err) {
-        if (!err) {
-            log.info('User created!');
-            response.writeHead(200, defaultHeader);
-            response.write(JSON.stringify(user));
+    RoleModel.findOne({name: config.get('default:role')}, function (err, role) {
+        if (err) {
+            //handle error
+            response.writeHead(404, defaultHeader);
+            response.write({error: err});
+            response.end();
+        }else if (!role) {
+            //and that error too
+            response.writeHead(500, defaultHeader);
+            response.write({error: 'Role not found (server side)'});
+            response.end();
         } else {
-            if (err.name == 'ValidationError') {
-                response.statusCode = 400;
-                response.send({error: 'Validation error'});
-            } else {
-                response.statusCode = 500;
-                response.send({error: 'Server error'});
-            }
-            log.error('Internal error(%d): %s', response.statusCode, err.message);
+            user.roles.push(role._id);
+            user.save(function (err) {
+                if (!err) {
+                    log.info('User created!');
+                    response.writeHead(200, defaultHeader);
+                    response.write(JSON.stringify(user));
+                } else {
+                    if (err.name == 'ValidationError') {
+                        response.statusCode = 400;
+                        response.send({error: 'Validation error'});
+                    } else {
+                        response.statusCode = 500;
+                        response.send({error: 'Server error'});
+                    }
+                    log.error('Internal error(%d): %s', response.statusCode, err.message);
+                }
+                response.end();
+            });
         }
-        response.end();
     });
 }
 

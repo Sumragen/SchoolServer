@@ -3,25 +3,9 @@
  */
 var mongoose = require('mongoose'),
     crypto = require('crypto'),
+    Role = require('./role'),
     Schema = mongoose.Schema;
 
-var Role = new Schema({
-    id: {
-        type: Number,
-        required: true,
-        unique: true
-    },
-    name: {
-        type: String,
-        required: true,
-        unique: true
-    },
-    description: {
-        type: String,
-        required: true
-    },
-    permissions: [Number]
-});
 var User = new Schema({
     id: {
         type: Number,
@@ -58,7 +42,7 @@ var User = new Schema({
         type: Date,
         default: Date.now
     },
-    roles: [Role]
+    roles: [{type: Schema.Types.ObjectId, ref: 'Role'}]
 });
 User.methods.encryptPassword = function (password) {
     return crypto.createHmac('sha1', this.salt).update(password).digest('hex');

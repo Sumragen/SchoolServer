@@ -11,6 +11,7 @@ var db = require(libs + 'db/mongoose');
 var config = require(libs + 'config');
 
 var User = require(libs + 'model/user');
+var Role = require(libs + 'model/role');
 var Client = require(libs + 'model/client');
 var AccessToken = require(libs + 'model/accessToken');
 var RefreshToken = require(libs + 'model/refreshToken');
@@ -53,6 +54,7 @@ var student = {
     permissions: [p.canViewUsers,
         p.canEditUser, p.canViewSchedule, p.canViewEvents]
 };
+var roles = [admin, teacher, student];
 var source = {
     user: {
         objects: [
@@ -63,7 +65,7 @@ var source = {
                 username: 'admin',
                 email: 'Davidich@smotra.ru',
                 password: 'admin',
-                roles: [admin]
+                roles: ['admin']
             },
             {
                 id: 2,
@@ -72,7 +74,7 @@ var source = {
                 username: 'teacher',
                 email: 'zarrubin@24auto.ru',
                 password: 'teacher',
-                roles: [teacher]
+                roles: ['teacher']
             },
             {
                 id: 3,
@@ -81,21 +83,40 @@ var source = {
                 username: 'student',
                 email: 'Gocha@gmail.com',
                 password: 'student',
-                roles: [student]
+                roles: ['student']
             }
         ],
         lastIndex: 3
     }
 };
-User.remove({}, function (err) {
-    _.each(source.user.objects, function (data) {
-        var user = new User(data);
-        user.save(function (err, user) {
+Role.remove({}, function (err) {
+    _.each(roles, function (data) {
+        var role = new Role(data);
+        role.save(function (err, role) {
             if (!err) {
-                log.info("New user - %s:%s", user.username, user.password);
+                log.info("New role - %s", role.name);
             } else {
                 return log.error(err);
             }
+        })
+    })
+});
+User.remove({}, function (err) {
+    Role.find(function (err, roles) {
+        _.each(source.user.objects, function (userEntity) {
+            var userRoles = _.filter(roles, function (r) {
+                return r.name == userEntity.roles[0]
+            });
+            delete userEntity.roles;
+            var user = new User(userEntity);
+            user.roles.push(userRoles[0]._id);
+            user.save(function (err, data) {
+                if (!err) {
+                    log.info("New user - %s:%s", data.username, data.password);
+                } else {
+                    return log.error(err);
+                }
+            });
         });
     });
 });
@@ -130,5 +151,5 @@ RefreshToken.remove({}, function (err) {
 });
 
 setTimeout(function () {
-    db.disconnect();
+    //db.disconnect();
 }, 3000);

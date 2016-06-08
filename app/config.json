@@ -8,6 +8,7 @@
     "uri": "mongodb://localhost:27017/SchoolDB"
   },
   "default" : {
+    "role" : "student",
     "client": {
       "name": "Android API v1",
       "clientId": "android",
