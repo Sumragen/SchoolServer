@@ -7,18 +7,11 @@ var libs = process.cwd() + '/app/libs/',
     log = require(libs + 'log')(module),
     config = require(libs + 'config');
 
-var defaultHeader = {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Origin': '*'
-};
-
 module.exports = function (app) {
     /**
      * Login
      */
     app.post('/api/login', function (request, response) {
-        response.set(defaultHeader);
         User.find({username: request.body.username}, function (err, user) {
             if (err) {
                 response.status(404).json(err);
@@ -50,7 +43,6 @@ module.exports = function (app) {
     //register
     app.post('/api/user/add', function (request, response) {
         var user = new User(request.body);
-        response.set(defaultHeader);
         Role.findOne({name: config.get('default:role')}, function (err, role) {
             if (err) {
                 response.status(404).send({message: err});
@@ -82,7 +74,6 @@ module.exports = function (app) {
      */
         // List
     app.get('/api/users', function (request, response) {
-        response.set(defaultHeader);
         User.find(function (err, users) {
             response.json(users);
         });
@@ -90,7 +81,6 @@ module.exports = function (app) {
 
         // Get user by id
     app.get('/api/user/:id', function (request, response) {
-        response.set(defaultHeader);
         User.findById(request.params.id, function (err, user) {
             if (!err) {
                 response.json(user);
@@ -104,7 +94,6 @@ module.exports = function (app) {
      * Update
      */
     app.put('/api/user/:id', function (request, response) {
-        response.set(defaultHeader);
         User.findById(request.params.id, function (err, user) {
             if (err) response.status(err.code).send({message: err});
             if (!user) response.status(404).send({message: 'User not found'});
@@ -127,7 +116,6 @@ module.exports = function (app) {
      * Delete
      */
     app.delete('/api/user/:id', function (request, response) {
-        response.set(defaultHeader);
         User.findById(request.params.id, function (err, user) {
             if (err) response.status(err.code).send({message: err});
             if (!user) response.status(404).send({message: 'User not found'});

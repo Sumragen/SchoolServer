@@ -24,8 +24,12 @@ app.use(morgan('dev'));
 app.use(passport.initialize());
 require(libs + 'auth/auth');
 app.use(function (req, res, next) {
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:9002');
-    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,Access-Control-Allow-Origin,content-type');
+    var defaultHeaders = {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Headers': 'X-Requested-With,Access-Control-Allow-Origin,Content-Type',
+        'Access-Control-Allow-Origin': '*'
+    };
+    res.set(defaultHeaders);
     next();
 });
 //app.use(session({secret: 'some secret', cookie: {maxAge : 36000}}));
