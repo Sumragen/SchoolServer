@@ -8,6 +8,13 @@
     "uri": "mongodb://localhost:27017/SchoolDB"
   },
   "default" : {
+    "stage" :{
+      "min" : 1,
+      "max" : 11
+    },
+    "lesson" : {
+      "max" : 8
+    },
     "role" : "student",
     "client": {
       "name": "Android API v1",

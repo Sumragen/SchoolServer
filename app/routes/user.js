@@ -1,7 +1,8 @@
 /**
  * Created by trainee on 6/9/16.
  */
-var libs = process.cwd() + '/app/libs/',
+var _ = require('lodash'),
+    libs = process.cwd() + '/app/libs/',
     User = require(libs + 'model/user'),
     Role = require(libs + 'model/role'),
     log = require(libs + 'log')(module),
@@ -29,7 +30,7 @@ module.exports = function (app) {
                             roles: user[0].roles,
                             _id: user[0]._id
                         };
-                        response.status(200).json({currentUser: currentUser, sessionToken: 'simple sessionToken'});
+                        response.status(200).json({currentUser: currentUser, sessionID: request.sessionID});
                     });
             } else {
                 response.status(404).send({message: 'User not found'});
@@ -40,7 +41,7 @@ module.exports = function (app) {
     /**
      * Create
      */
-    //register
+        //register
     app.post('/api/user/add', function (request, response) {
         var user = new User(request.body);
         Role.findOne({name: config.get('default:role')}, function (err, role) {
@@ -75,11 +76,25 @@ module.exports = function (app) {
         // List
     app.get('/api/users', function (request, response) {
         User.find(function (err, users) {
-            response.json(users);
+            var result = _.map(users, function (user) {
+                return {
+                    first_name: user.first_name,
+                    last_name: user.last_name,
+                    username: user.username,
+                    email: user.email,
+                    roles: user.roles,
+                    _id: user._id
+                }
+            });
+            if (request.query.limit && request.query.offset) {
+                response.json(result.splice(Number(request.query.offset), Number(request.query.limit)))
+            } else {
+                response.json(result);
+            }
         });
     });
 
-        // Get user by id
+    // Get user by id
     app.get('/api/user/:id', function (request, response) {
         User.findById(request.params.id, function (err, user) {
             if (!err) {
@@ -121,9 +136,11 @@ module.exports = function (app) {
             if (!user) response.status(404).send({message: 'User not found'});
 
             user.remove(function (err) {
-                if (err) response.status(err.code).send({message: err});
-
-                response.status(200).send({message: 'User deleted'});
+                if (err) {
+                    response.status(err.code).send({message: err});
+                } else {
+                    response.status(200).send({message: 'User deleted'});
+                }
             })
         })
     });

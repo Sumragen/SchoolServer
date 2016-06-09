@@ -10,11 +10,18 @@ var log = require(libs + 'log')(module);
 var db = require(libs + 'db/mongoose');
 var config = require(libs + 'config');
 
-var User = require(libs + 'model/user');
-var Role = require(libs + 'model/role');
-var Client = require(libs + 'model/client');
-var AccessToken = require(libs + 'model/accessToken');
-var RefreshToken = require(libs + 'model/refreshToken');
+// models
+var User = require(libs + 'model/user'),
+    Role = require(libs + 'model/role'),
+    Event = require(libs + 'model/event'),
+    Lesson = require(libs + 'model/lesson'),
+    Stage = require(libs + 'model/stage'),
+    Subject = require(libs + 'model/subject'),
+    Client = require(libs + 'model/client'),
+    AccessToken = require(libs + 'model/accessToken'),
+    RefreshToken = require(libs + 'model/refreshToken');
+
+
 var permissionSet = {
     'isTeacher': 0x001,
     'hasAdminRights': 0x002,
@@ -85,6 +92,181 @@ var source = {
         ]
     }
 };
+var events = [
+    {
+        name: 'Rest',
+        date: 'February 19, 2016 11:50 AM',
+        description: 'first event (test version)',
+        address:{
+            city: 'Kherson',
+            country: 'Ukraine'
+        },
+        location: {
+            latitude: 46.6699334,
+            longitude: 32.6169105
+        }
+    },
+    {
+        name: "Children's hospital",
+        date: 'September 23, 2016 2:30 PM',
+        description: 'Medical inspection',
+        address:{
+            city: 'Kherson',
+            country: 'Ukraine'
+        },
+        location: {
+            latitude: 46.6676171,
+            longitude: 32.6100075
+        }
+    },
+    {
+        name: 'spring ball',
+        date: 'April 15, 2016 4:00 PM',
+        description: 'spring ball',
+        address:{
+            city: 'Kherson',
+            country: 'Ukraine'
+        },
+        location: {
+            latitude: 46.6716115,
+            longitude: 32.6100684
+        }
+    }
+];
+var lessons = [
+    {
+        stage: '1',
+        suffix: 'A',
+        classroom: 220,
+        day: 'Monday',
+        order: [1, 3]
+    },
+    {
+        stage: '4',
+        suffix: 'A',
+        classroom: 305,
+        day: 'Tuesday',
+        order: [2]
+    },
+    {
+        stage: '2',
+        suffix: 'A',
+        classroom: 216,
+        day: 'Wednesday',
+        order: [1]
+    },
+    {
+        stage: '11',
+        suffix: 'A',
+        classroom: 101,
+        day: 'Thursday',
+        order: [4]
+    },
+    {
+        stage: '8',
+        suffix: 'A',
+        classroom: 306,
+        day: 'Friday',
+        order: [1, 3]
+    },
+    {
+        stage: '2',
+        suffix: 'A',
+        classroom: 106,
+        day: 'Wednesday',
+        order: [0, 2]
+    },
+    {
+        stage: '5',
+        suffix: 'B',
+        classroom: 207,
+        day: 'Wednesday',
+        order: [1, 2]
+    }
+];
+var stages = [
+    {
+        stage: 5,
+        suffix: 'A',
+    },
+    {
+        stage: 11,
+        suffix: 'A',
+    },
+    {
+        stage: 11,
+        suffix: 'B',
+    },
+    {
+        stage: 1,
+        suffix: 'A',
+    },
+    {
+        stage: 2,
+        suffix: 'A',
+    },
+    {
+        stage: 3,
+        suffix: 'A',
+    },
+    {
+        stage: 4,
+        suffix: 'A',
+    },
+    {
+        stage: 5,
+        suffix: 'B',
+    },
+    {
+        stage: 6,
+        suffix: 'A',
+    },
+    {
+        stage: 7,
+        suffix: 'A',
+    },
+    {
+        stage: 8,
+        suffix: 'A',
+    },
+    {
+        stage: 9,
+        suffix: 'A',
+    },
+    {
+        stage: 10,
+        suffix: 'A',
+    }
+];
+var subjects = [
+    {
+        name: 'History',
+        teachers: [],
+        classRooms: [202]
+    },
+    {
+        name: 'Mathematics',
+        teachers: [],
+        classRooms: [202]
+    },
+    {
+        name: 'Biology',
+        teachers: [],
+        classRooms: [202]
+    },
+    {
+        name: 'Astronomy',
+        teachers: [],
+        classRooms: [202]
+    },
+    {
+        name: 'Literature',
+        teachers: [],
+        classRooms: [202]
+    }
+];
+
+
 Role.remove({}, function (err) {
     _.each(roles, function (data) {
         var role = new Role(data);
@@ -115,6 +297,54 @@ User.remove({}, function (err) {
             });
         });
     });
+});
+Event.remove({}, function (err) {
+    _.each(events, function (data) {
+        var event = new Event(data);
+        event.save(function (err, event) {
+            if (!err) {
+                log.info("New event - %s", event.name);
+            } else {
+                return log.error(err);
+            }
+        })
+    })
+});
+Lesson.remove({}, function (err) {
+    _.each(lessons, function (data) {
+        var lesson = new Lesson(data);
+        lesson.save(function (err, lesson) {
+            if (!err) {
+                log.info("New lesson");
+            } else {
+                return log.error(err);
+            }
+        })
+    })
+});
+Stage.remove({}, function (err) {
+    _.each(stages, function (data) {
+        var stage = new Stage(data);
+        stage.save(function (err, stage) {
+            if (!err) {
+                log.info("New stage - %s-%s", stage.stage, stage.suffix);
+            } else {
+                return log.error(err);
+            }
+        })
+    })
+});
+Subject.remove({}, function (err) {
+    _.each(subjects, function (data) {
+        var subject = new Subject(data);
+        subject.save(function (err, subject) {
+            if (!err) {
+                log.info("New subject - %s", subject.name);
+            } else {
+                return log.error(err);
+            }
+        })
+    })
 });
 
 Client.remove({}, function (err) {

@@ -7,6 +7,7 @@ var path = require('path'),
     express = require('express'),
     app = express(),
     bodyParser = require('body-parser'),
+    session = require('express-session'),
     morgan = require('morgan'),
     passport = require('passport'),
     libs = process.cwd() + '/app/libs/',
@@ -32,7 +33,16 @@ app.use(function (req, res, next) {
     res.set(defaultHeaders);
     next();
 });
-//app.use(session({secret: 'some secret', cookie: {maxAge : 36000}}));
+app.use(session({
+    path: '/',
+    httpOnly: true,
+    secret: 'some secret',
+    cookie: {
+        maxAge: 36000
+    },
+    resave: true,
+    saveUninitialized: true
+}));
 
 //catch errors
 /*
