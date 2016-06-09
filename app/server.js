@@ -28,22 +28,16 @@ app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,Access-Control-Allow-Origin,content-type');
     next();
 });
-
-
-app.post('/oauth/token', oauth2.token);
-app.get('/api/userInfo',passport.authenticate('bearer', {session: false}),
-    function (req, res) {
-        res.json({ user_id: req.user.userId, name: req.user.username, scope: req.authInfo.scope })
-    });
+//app.use(session({secret: 'some secret', cookie: {maxAge : 36000}}));
 
 //catch errors
 /*
-app.use(function (req, res, next) {
-    res.status(404);
-    log.debug('Not found URL: %s', req.url);
-    res.send({error: 'Not found'});
-});
-*/
+ app.use(function (req, res, next) {
+ res.status(404);
+ log.debug('Not found URL: %s', req.url);
+ res.send({error: 'Not found'});
+ });
+ */
 
 app.use(function (err, req, res, next) {
     res.status(err.status || 500);

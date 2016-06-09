@@ -7,11 +7,6 @@ var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
 var User = new Schema({
-    id: {
-        type: Number,
-        required: true,
-        unique: true
-    },
     first_name: {
         type: String,
         required: true
@@ -63,22 +58,8 @@ User.virtual('password')
 User.methods.checkPassword = function (password) {
     return this.encryptPassword(password) === this.hashedPassword;
 };
-User.methods.getToClient = function () {
-    return {
-        id: this.id,
-        first_name: this.first_name,
-        last_name: this.last_name,
-        username: this.username,
-        email: this.email,
-        roles: [
-            {
-                id: this.roles[0].id,
-                description: this.roles[0].description,
-                name: this.roles[0].name,
-                permissions: this.roles[0].permissions
-            }
-        ]
-    }
+User.methods.getUserRoles = function () {
+    return Role.find({_id: this.roles[0]}).exec();
 };
 
 module.exports = mongoose.model('User', User);

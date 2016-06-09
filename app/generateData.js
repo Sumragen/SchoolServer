@@ -33,24 +33,24 @@ var permissionSet = {
 };
 var p = permissionSet;
 var admin = {
-    id: 1,
     name: 'admin',
     description: 'admin rights',
+    weight : 90,
     permissions: [p.isTeacher, p.hasAdminRights, p.canViewUsers, p.canEditUser, p.canAddUsers,
         p.canDeleteUsers, p.canViewSchedule, p.canEditSchedule, p.canAddSchedule, p.canDeleteSchedule,
         p.canViewEvents, p.canEditEvents, p.canAddEvents, p.canDeleteEvents]
 };
 var teacher = {
-    id: 2,
     name: 'teacher',
     description: 'teacher rights',
+    weight : 50,
     permissions: [p.isTeacher,
         p.canViewUsers, p.canEditUser, p.canViewSchedule, p.canViewEvents, p.canEditEvents, p.canAddEvents, p.canDeleteEvents]
 };
 var student = {
-    id: 3,
     name: 'student',
     description: 'student rights',
+    weight: 10,
     permissions: [p.canViewUsers,
         p.canEditUser, p.canViewSchedule, p.canViewEvents]
 };
@@ -59,7 +59,6 @@ var source = {
     user: {
         objects: [
             {
-                id: 1,
                 first_name: 'Eric',
                 last_name: 'Tituashvili',
                 username: 'admin',
@@ -68,7 +67,6 @@ var source = {
                 roles: ['admin']
             },
             {
-                id: 2,
                 first_name: 'Aleksey',
                 last_name: 'Zarrubin',
                 username: 'teacher',
@@ -77,7 +75,6 @@ var source = {
                 roles: ['teacher']
             },
             {
-                id: 3,
                 first_name: 'George',
                 last_name: 'Chivchan',
                 username: 'student',
@@ -85,8 +82,7 @@ var source = {
                 password: 'student',
                 roles: ['student']
             }
-        ],
-        lastIndex: 3
+        ]
     }
 };
 Role.remove({}, function (err) {
@@ -151,5 +147,5 @@ RefreshToken.remove({}, function (err) {
 });
 
 setTimeout(function () {
-    //db.disconnect();
+    db.disconnect();
 }, 3000);

@@ -5,15 +5,16 @@ var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
 var Role = new Schema({
-    id: {
-        type: Number,
-        required: true,
-        unique: true
-    },
     name: {
         type: String,
         required: true,
         unique: true
+    },
+    weight: {
+        type: Number,
+        required: true,
+        min: 0,
+        max: 100
     },
     description: {
         type: String,
