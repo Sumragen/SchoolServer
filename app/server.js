@@ -7,7 +7,9 @@ var path = require('path'),
     express = require('express'),
     app = express(),
     bodyParser = require('body-parser'),
+    cookieParser = require('cookie-parser'),
     session = require('express-session'),
+    FileStore = require('session-file-store')(session),
     morgan = require('morgan'),
     passport = require('passport'),
     libs = process.cwd() + '/app/libs/',
@@ -18,32 +20,43 @@ var path = require('path'),
 
 var port = config.get('port');
 var host = config.get('host');
-
+var defaultHeaders = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Headers': 'X-Requested-With,Access-Control-Allow-Origin,Content-Type',
+    'Access-Control-Allow-Origin': '*'
+};
 //configure
 app.use(bodyParser.json());
 app.use(morgan('dev'));
 app.use(passport.initialize());
-require(libs + 'auth/auth');
+//require(libs + 'auth/auth');
 app.use(function (req, res, next) {
-    var defaultHeaders = {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Headers': 'X-Requested-With,Access-Control-Allow-Origin,Content-Type',
-        'Access-Control-Allow-Origin': '*'
-    };
     res.set(defaultHeaders);
     next();
 });
-app.use(session({
-    path: '/',
-    httpOnly: true,
-    secret: 'some secret',
-    cookie: {
-        maxAge: 36000
-    },
-    resave: true,
-    saveUninitialized: true
-}));
 
+app.use(cookieParser('foo'));
+app.use(session({
+    name: 'SessionId',
+    secret: 'foo',
+    cookie: {
+        path: '/',
+        httpOnly: true,
+        maxAge: config.get('cookie:maxAge'),
+        secure: false
+    },
+    store: new FileStore(),
+    resave: false,
+    saveUninitialized: false
+}));
+app.use(function (req, res, next) {
+    console.log(req.session.id);
+    if(req.session.authorized){
+        next();
+    }else{
+        next();
+    }
+});
 //catch errors
 /*
  app.use(function (req, res, next) {

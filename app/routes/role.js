@@ -36,7 +36,7 @@ module.exports = function (app) {
     /**
      * Read
      */
-    app.get('/api/role', function (req, res) {
+    app.get('/api/roles', function (req, res) {
         Role.find(function (err, roles) {
             checkOnError(err, roles, function () {
                 res.status(200).json(roles);

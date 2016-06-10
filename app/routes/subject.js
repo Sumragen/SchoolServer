@@ -36,7 +36,7 @@ module.exports = function (app) {
     /**
      * Read
      */
-    app.get('/api/subject', function (req, res) {
+    app.get('/api/subjects', function (req, res) {
         Subject.find(function (err, subjects) {
             checkOnError(err, subjects, function () {
                 res.status(200).json(subjects);

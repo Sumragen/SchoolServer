@@ -36,7 +36,7 @@ module.exports = function (app) {
     /**
      * Read
      */
-    app.get('/api/stage', function (req, res) {
+    app.get('/api/stages', function (req, res) {
         Stage.find(function (err, stages) {
             checkOnError(err, stages, function () {
                 res.status(200).json(stages);

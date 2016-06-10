@@ -36,7 +36,7 @@ module.exports = function (app) {
     /**
      * Read
      */
-    app.get('/api/event', function (req, res) {
+    app.get('/api/events', function (req, res) {
         Event.find(function (err, events) {
             checkOnError(err, events, function () {
                 res.status(200).json(events);

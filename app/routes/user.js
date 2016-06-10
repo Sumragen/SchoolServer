@@ -30,10 +30,25 @@ module.exports = function (app) {
                             roles: user[0].roles,
                             _id: user[0]._id
                         };
+                        request.session.authorized = true;
                         response.status(200).json({currentUser: currentUser, sessionID: request.sessionID});
                     });
             } else {
                 response.status(404).send({message: 'User not found'});
+            }
+        });
+    });
+
+    /**
+     * Logout
+     */
+    app.post('/api/logout', function (req, res) {
+        //delete req.session.authorized;
+        req.session.destroy(function (err) {
+            if(err){
+                res.status(err.code).send({message:err});
+            }else{
+                res.status(200).send({message:'OK'});
             }
         });
     });

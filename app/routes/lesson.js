@@ -36,7 +36,7 @@ module.exports = function (app) {
     /**
      * Read
      */
-    app.get('/api/lesson', function (req, res) {
+    app.get('/api/lessons', function (req, res) {
         Lesson.find(function (err, lessons) {
             checkOnError(err, lessons, function () {
                 res.status(200).json(lessons);

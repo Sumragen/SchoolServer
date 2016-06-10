@@ -7,6 +7,10 @@
   "mongoose" :{
     "uri": "mongodb://localhost:27017/SchoolDB"
   },
+  "cookie" : {
+    "secret" : "JAS1f4-ASK981",
+    "maxAge" : 360000
+  },
   "default" : {
     "stage" :{
       "min" : 1,
