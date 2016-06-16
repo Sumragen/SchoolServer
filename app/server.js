@@ -6,10 +6,10 @@ var path = require('path'),
     http = require('http'),
     express = require('express'),
     app = express(),
+    _ = require('lodash'),
     bodyParser = require('body-parser'),
     cookieParser = require('cookie-parser'),
-    session = require('express-session'),
-    FileStore = require('session-file-store')(session),
+    headerSession = require('node-header-session'),
     morgan = require('morgan'),
     passport = require('passport'),
     libs = process.cwd() + '/app/libs/',
@@ -22,7 +22,7 @@ var port = config.get('port');
 var host = config.get('host');
 var defaultHeaders = {
     'Content-Type': 'application/json',
-    'Access-Control-Allow-Headers': 'X-Requested-With,Access-Control-Allow-Origin,Content-Type',
+    'Access-Control-Allow-Headers': 'X-Requested-With,Access-Control-Allow-Origin,Content-Type,Accept,X-Sessionid',
     'Access-Control-Allow-Origin': '*'
 };
 //configure
@@ -36,25 +36,32 @@ app.use(function (req, res, next) {
 });
 
 app.use(cookieParser('foo'));
-app.use(session({
-    name: 'SessionId',
-    secret: 'foo',
-    cookie: {
-        path: '/',
-        httpOnly: true,
-        maxAge: config.get('cookie:maxAge'),
-        secure: false
-    },
-    store: new FileStore(),
-    resave: false,
-    saveUninitialized: false
-}));
+headerSession(app, {
+    name: 'x-sessionID',
+    debug: false,
+    root: '/api'
+});
+
+var unsafePath = {'/api/login': ['POST', 'OPTIONS']};
+//handle authorized user
 app.use(function (req, res, next) {
-    console.log(req.session.id);
-    if(req.session.authorized){
-        next();
+    console.log('---------------------------------------');
+    console.log(req.headerSession.token);
+    if(req.method == 'OPTIONS'){
+        res.status(200).send({message: 'done'});
     }else{
-        next();
+        req.headerSession.getSession()
+            .then(function (session) {
+                if (!unsafePath[req.url] || unsafePath[req.url].length > 0 && unsafePath[req.url].indexOf(req.method) > -1) {
+                    next();
+                } else {
+                    if (!session.userId) {
+                        res.status(401).send({message: 'Please login'});
+                    } else {
+                        next();
+                    }
+                }
+            });
     }
 });
 //catch errors
