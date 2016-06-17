@@ -17,26 +17,31 @@ var User = require(libs + 'model/user'),
     Lesson = require(libs + 'model/lesson'),
     Stage = require(libs + 'model/stage'),
     Subject = require(libs + 'model/subject'),
+    Teacher = require(libs + 'model/teacher'),
     Client = require(libs + 'model/client'),
     AccessToken = require(libs + 'model/accessToken'),
     RefreshToken = require(libs + 'model/refreshToken');
 
 
 var permissionSet = {
-    'isTeacher': 0x001,
-    'hasAdminRights': 0x002,
-    'canViewUsers': 0x003,
-    'canEditUser': 0x004,
-    'canAddUsers': 0x005,
-    'canDeleteUsers': 0x006,
-    'canViewSchedule': 0x007,
-    'canEditSchedule': 0x008,
-    'canAddSchedule': 0x009,
-    'canDeleteSchedule': 0x00a,
-    'canViewEvents': 0x00b,
-    'canEditEvents': 0x00c,
-    'canAddEvents': 0x00d,
-    'canDeleteEvents': 0x00e
+    'isTeacher': 1,
+    'hasAdminRights': 2,
+    'canViewUsers': 3,
+    'canEditUser': 4,
+    'canAddUsers': 5,
+    'canDeleteUsers': 6,
+    'canViewSchedule': 7,
+    'canEditSchedule': 8,
+    'canAddSchedule': 9,
+    'canDeleteSchedule': 10,
+    'canViewEvents': 11,
+    'canEditEvents': 12,
+    'canAddEvents': 13,
+    'canDeleteEvents': 14,
+    'canViewStages': 15,
+    'canEditStages': 16,
+    'canAddStages': 17,
+    'canDeleteStages': 18
 };
 var p = permissionSet;
 var admin = {
@@ -45,7 +50,7 @@ var admin = {
     weight : 90,
     permissions: [p.isTeacher, p.hasAdminRights, p.canViewUsers, p.canEditUser, p.canAddUsers,
         p.canDeleteUsers, p.canViewSchedule, p.canEditSchedule, p.canAddSchedule, p.canDeleteSchedule,
-        p.canViewEvents, p.canEditEvents, p.canAddEvents, p.canDeleteEvents]
+        p.canViewEvents, p.canEditEvents, p.canAddEvents, p.canDeleteEvents, p.canViewStages, p.canEditStages, p.canAddStages, p.canDeleteStages]
 };
 var teacher = {
     name: 'teacher',
@@ -347,6 +352,28 @@ Subject.remove({}, function (err) {
     })
 });
 
+setTimeout(function () {
+    Teacher.remove({}, function (err) {
+        User.find(function (err, users) {
+            Subject.find(function (err, subjects) {
+                _.each(users, function (user) {
+                    var teacher = new Teacher({
+                        user: user._id,
+                        subjects: [subjects[0]._id,subjects[1]._id]
+                    });
+                    teacher.save(function (err, teacher) {
+                        if(!err){
+                            log.info('New teacher');
+                        }else{
+                            return log.error(err);
+                        }
+                    })
+                })
+            })
+        });
+    });
+}, 5000);
+
 Client.remove({}, function (err) {
     var client = new Client({
         name: config.get("default:client:name"),
@@ -378,4 +405,4 @@ RefreshToken.remove({}, function (err) {
 
 setTimeout(function () {
     db.disconnect();
-}, 3000);
+}, 10 * 1000);

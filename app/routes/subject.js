@@ -4,9 +4,10 @@
 var _ = require('lodash'),
     libs = process.cwd() + '/app/libs/',
     Subject = require(libs + 'model/subject'),
+    Teacher = require(libs + 'model/teacher'),
     log = require(libs + 'log');
 
-function checkOnError(err, item, next){
+function checkOnError(err, item, next) {
     if (err) {
         res.status(err.code).send({message: err});
     } else if (!item) {
@@ -51,6 +52,32 @@ module.exports = function (app) {
             });
         })
     });
+    app.get('/api/subject/teacher/:id', function (req, res) {
+        Teacher.find({user: req.params.id}, function (err, teacher) {
+            if (teacher[0] && !err) {
+                Subject.find(function (err, subjects) {
+                    if (subjects && !err) {
+                        var resBody = [];
+                        _.each(teacher[0].subjects, function (sub) {
+                            _.every(subjects, function (subject) {
+                                if (sub.id == subject._id.id) {
+                                    resBody.push(subject);
+                                    return false;
+                                }
+                                return true;
+                            });
+                        });
+                        res.status(200).send(resBody);
+                    } else {
+                        res.status(err ? err.code : 404).send({message: err || 'Subjects not found'});
+                    }
+
+                });
+            } else {
+                res.status(err ? err.code : 404).send({message: err || 'Teacher not found'});
+            }
+        })
+    });
 
     /**
      * Update
@@ -76,9 +103,9 @@ module.exports = function (app) {
         Subject.findById(req.params.id, function (err, subject) {
             checkOnError(err, subject, function () {
                 subject.remove(function (err) {
-                    if(err){
+                    if (err) {
                         res.status(err.code).send({message: err});
-                    }else{
+                    } else {
                         res.status(200).send({message: 'Subject deleted'});
                     }
                 })

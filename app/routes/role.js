@@ -6,7 +6,7 @@ var _ = require('lodash'),
     Role = require(libs + 'model/role'),
     log = require(libs + 'log');
 
-function checkOnError(err, item, next){
+function checkOnError(res, err, item, next){
     if (err) {
         res.status(err.code).send({message: err});
     } else if (!item) {
@@ -38,7 +38,7 @@ module.exports = function (app) {
      */
     app.get('/api/roles', function (req, res) {
         Role.find(function (err, roles) {
-            checkOnError(err, roles, function () {
+            checkOnError(res, err, roles, function () {
                 res.status(200).json(roles);
             });
         });
@@ -46,7 +46,7 @@ module.exports = function (app) {
 
     app.get('/api/role/:id', function (req, res) {
         Role.findById(req.params.id, function (err, role) {
-            checkOnError(err, role, function () {
+            checkOnError(res, err, role, function () {
                 res.status(200).json(role);
             });
         })
@@ -57,7 +57,7 @@ module.exports = function (app) {
      */
     app.put('/api/role/:id', function (req, res) {
         Role.findById(req.params.id, function (err, role) {
-            checkOnError(err, role, function () {
+            checkOnError(res, err, role, function () {
                 role = req.body;
                 role.save(function (err) {
                     if (err) {
@@ -74,7 +74,7 @@ module.exports = function (app) {
      */
     app.delete('/api/role/:id', function (req, res) {
         Role.findById(req.params.id, function (err, role) {
-            checkOnError(err, role, function () {
+            checkOnError(res, err, role, function () {
                 role.remove(function (err) {
                     if(err){
                         res.status(err.code).send({message: err});

@@ -26,6 +26,7 @@
     "http": "0.0.0",
     "lodash": "^4.13.1",
     "mongoose": "^4.4.20",
+    "mongoose-auto-increment": "^5.0.1",
     "morgan": "^1.7.0",
     "nconf": "^0.8.4",
     "node-header-session": "^0.5.1",

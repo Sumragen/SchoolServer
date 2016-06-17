@@ -9,6 +9,7 @@ function initRoutes(app){
     require('./routes/stage')(app);
     require('./routes/subject')(app);
     require('./routes/user')(app);
+    require('./routes/teacher')(app);
 }
 
 exports.initRoutes = initRoutes;

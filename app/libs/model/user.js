@@ -58,8 +58,15 @@ User.virtual('password')
 User.methods.checkPassword = function (password) {
     return this.encryptPassword(password) === this.hashedPassword;
 };
-User.methods.getUserRoles = function () {
-    return Role.find({_id: this.roles[0]}).exec();
+User.methods.getValues = function () {
+    return {
+        first_name: this.first_name,
+        last_name: this.last_name,
+        username: this.username,
+        email: this.email,
+        roles: this.roles,
+        _id: this._id
+    }
 };
 
 module.exports = mongoose.model('User', User);

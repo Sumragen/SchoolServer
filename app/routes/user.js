@@ -19,22 +19,14 @@ module.exports = function (app) {
             } else if (user.length <= 0) {
                 response.status(404).json({message: 'User not found'});
             } else if (user[0].checkPassword(request.body.password)) {
-                user[0].getUserRoles()
-                    .then(function (roles) {
-                        user[0].roles = roles;
-                        var currentUser = {
-                            first_name: user[0].first_name,
-                            last_name: user[0].last_name,
-                            username: user[0].username,
-                            email: user[0].email,
-                            roles: user[0].roles,
-                            _id: user[0]._id
-                        };
-                        request.headerSession.getSession()
-                            .then(function (session) {
-                                session['userId'] = currentUser._id;
-                                response.status(200).json({currentUser: currentUser, sessionID: request.headerSession.token});
-                            });
+                request.headerSession.getSession()
+                    .then(function (session) {
+                        session['userId'] = user[0]._id;
+                        var currentUser = user[0].getValues();
+                        Role.findById(currentUser.roles[0], function (err, role) {
+                            currentUser.roles[0] = role;
+                            response.status(200).json({currentUser: currentUser, sessionID: request.headerSession.token});
+                        });
                     });
             } else {
                 response.status(404).send({message: 'User not found'});
@@ -51,7 +43,7 @@ module.exports = function (app) {
         //    if(err){
         //        res.status(err.code).send({message:err});
         //    }else{
-                res.status(200).send({message:'OK'});
+        res.status(200).send({message: 'OK'});
         //    }
         //});
     });
@@ -95,14 +87,7 @@ module.exports = function (app) {
     app.get('/api/users', function (request, response) {
         User.find(function (err, users) {
             var result = _.map(users, function (user) {
-                return {
-                    first_name: user.first_name,
-                    last_name: user.last_name,
-                    username: user.username,
-                    email: user.email,
-                    roles: user.roles,
-                    _id: user._id
-                }
+                return user.getValues();
             });
             if (request.query.limit && request.query.offset) {
                 response.json(result.splice(Number(request.query.offset), Number(request.query.limit)))
