@@ -65,7 +65,7 @@ User.methods.getValues = function () {
         username: this.username,
         email: this.email,
         roles: this.roles,
-        _id: this._id
+        id: this.userId
     }
 };
 

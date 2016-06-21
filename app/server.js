@@ -25,6 +25,7 @@ var host = config.get('host');
 var defaultHeaders = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Headers': 'X-Requested-With,Access-Control-Allow-Origin,Content-Type,Accept,X-Sessionid',
+    'Access-Control-Allow-Methods': 'POST, GET, PUT, DELETE, OPTIONS',
     'Access-Control-Allow-Origin': '*'
 };
 //configure
@@ -98,21 +99,21 @@ app.use(function (req, res, next) {
                             res.status(401).send({message: 'Please login'});
                         } else {
                             User.findById(session.userId, function (err, user) {
-                                if(user && !err){
+                                if (user && !err) {
                                     Role.findById(user.roles[0], function (err, role) {
-                                        if(role && !err){
-                                            if(_.every(lockedPath[req.url.split('?')[0]].permissions, function (perm) {
-                                                return role.permissions.indexOf(perm) > -1;
-                                            })){
+                                        if (role && !err) {
+                                            if (_.every(lockedPath[req.url.split('?')[0]].permissions, function (perm) {
+                                                    return role.permissions.indexOf(perm) > -1;
+                                                })) {
                                                 next();
-                                            }else{
-                                                res.status(403).send({message:'Access denied'});
+                                            } else {
+                                                res.status(403).send({message: 'Access denied'});
                                             }
-                                        }else{
+                                        } else {
                                             res.status(err.code || 404).send({message: err || 'Role not found'});
                                         }
                                     });
-                                }else{
+                                } else {
                                     res.status(err.code || 404).send({message: err || 'User not found'});
                                 }
                             });
