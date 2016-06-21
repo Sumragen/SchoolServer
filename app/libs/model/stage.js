@@ -20,7 +20,7 @@ var mongoose = require('mongoose'),
 var Stage = new Schema({
     stage: {
         type: Number,
-        required : true,
+        required: true,
         min: config.get('default:stage:min'),
         max: config.get('default:stage:max')
     },
@@ -29,11 +29,21 @@ var Stage = new Schema({
         required: true
     },
     formMaster: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
-        default: new mongoose.Types.ObjectId
+        id: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            default: new mongoose.Types.ObjectId
+        },
+        name : {
+            type: String,
+            default: 'Default name'
+        }
     }
 });
+Stage.virtual('id')
+    .get(function () {
+        return this.id;
+    });
 Stage.path('suffix').validate(function (v) {
     return v.length == 1;
 });

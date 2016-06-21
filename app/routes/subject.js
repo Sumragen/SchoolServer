@@ -53,8 +53,8 @@ module.exports = function (app) {
         })
     });
     app.get('/api/subject/teacher/:id', function (req, res) {
-        Teacher.find({user: req.params.id}, function (err, teacher) {
-            if (teacher[0] && !err) {
+        Teacher.find({"user.id": req.params.id}, function (err, teacher) {
+            if (teacher[0] && !err && req) {
                 Subject.find(function (err, subjects) {
                     if (subjects && !err) {
                         var resBody = [];
@@ -74,7 +74,7 @@ module.exports = function (app) {
 
                 });
             } else {
-                res.status(err ? err.code : 404).send({message: err || 'Teacher not found'});
+                res.status(!err ? 200 : 404).send({message: err || 'Teacher not found'});
             }
         })
     });

@@ -14,9 +14,15 @@ var mongoose = require('mongoose'),
  */
 var Teacher = new Schema({
     user: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
-        default: new mongoose.Types.ObjectId
+        id: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            default: new mongoose.Types.ObjectId
+        },
+        name: {
+            type: String,
+            default: 'default teacher name'
+        }
     },
     subjects: [{
         type: Schema.Types.ObjectId,

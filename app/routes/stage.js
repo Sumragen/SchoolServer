@@ -6,7 +6,7 @@ var _ = require('lodash'),
     Stage = require(libs + 'model/stage'),
     log = require(libs + 'log');
 
-function checkOnError(err, item, next){
+function checkOnError(err, item, next) {
     if (err) {
         res.status(err.code).send({message: err});
     } else if (!item) {
@@ -76,9 +76,9 @@ module.exports = function (app) {
         Stage.findById(req.params.id, function (err, stage) {
             checkOnError(err, stage, function () {
                 stage.remove(function (err) {
-                    if(err){
+                    if (err) {
                         res.status(err.code).send({message: err});
-                    }else{
+                    } else {
                         res.status(200).send({message: 'Stage deleted'});
                     }
                 })

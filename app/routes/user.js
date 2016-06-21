@@ -131,42 +131,49 @@ module.exports = function (app) {
                     user.last_name = reqBody.last_name;
                     user.username = reqBody.username;
                     user.email = reqBody.email;
-
-                    user.save(function (err) {
-                        if (!err) {
-                            //save teacher data
-                            if (reqBody.roles[0].weight >= 50 && reqBody.subjects && reqBody.subjects.length > 0) {
-                                Teacher.findOne({'user': reqBody.id}, function (err, teacher) {
-                                    if (err) {
-                                        response.status(500).send({message: err});
-                                    } else {
-                                        var subjects = _.map(reqBody.subjects, function (subject) {
-                                            return subject.id;
-                                        });
-                                        if (teacher) {
-                                            teacher.subjects = subjects;
-                                        } else {
-                                            teacher = new Teacher({
-                                                user: reqBody.id,
-                                                subjects: subjects
-                                            });
-                                        }
-                                        teacher.save(function (err) {
-                                            if(err){
+                    Role.findById(reqBody.role, function (err, role) {
+                        if (!err && role) {
+                            user.roles = [role._id];
+                            user.save(function (err, user) {
+                                if (!err) {
+                                    //save teacher data
+                                    if (role.weight >= 50 && reqBody.subjects && reqBody.subjects.length > 0) {
+                                        Teacher.findOne({'user': reqBody.id}, function (err, teacher) {
+                                            if (err) {
                                                 response.status(500).send({message: err});
-                                            }else{
-                                                response.status(200).json(user);
+                                            } else {
+                                                var subjects = _.map(reqBody.subjects, function (subject) {
+                                                    return subject.id;
+                                                });
+                                                if (teacher) {
+                                                    teacher.subjects = subjects;
+                                                } else {
+                                                    teacher = new Teacher({
+                                                        user: {
+                                                            id: reqBody.id,
+                                                            name: user.first_name + ' ' + user.last_name
+                                                        },
+                                                        subjects: subjects
+                                                    });
+                                                }
+                                                teacher.save(function (err) {
+                                                    if (err) {
+                                                        response.status(500).send({message: err});
+                                                    } else {
+                                                        response.status(200).json(user.getValues());
+                                                    }
+                                                });
                                             }
-                                        });
+                                        })
+                                    } else {
+                                        response.status(200).json(user);
                                     }
-                                })
-                            }else{
-                                response.status(200).json(user);
-                            }
-                        } else {
-                            response.status(500).send({message: err});
+                                } else {
+                                    response.status(500).send({message: err});
+                                }
+                            })
                         }
-                    })
+                    });
                 }
             })
         }
