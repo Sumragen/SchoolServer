@@ -3,7 +3,7 @@
  */
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema,
-    User = require('./user'),
+    Teacher = require('./teacher'),
     config = require('./../config');
 
 
@@ -29,15 +29,9 @@ var Stage = new Schema({
         required: true
     },
     formMaster: {
-        id: {
-            type: Schema.Types.ObjectId,
-            ref: 'User',
-            default: new mongoose.Types.ObjectId
-        },
-        name : {
-            type: String,
-            default: 'Default name'
-        }
+        type: Schema.Types.ObjectId,
+        ref: 'Teacher',
+        default: new mongoose.Types.ObjectId
     }
 });
 Stage.virtual('id')

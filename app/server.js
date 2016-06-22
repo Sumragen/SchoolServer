@@ -66,10 +66,12 @@ var permissionSet = {
     'canDeleteStages': 18
 };
 var p = permissionSet;
+//don't need session
 var unsafePath = {
     '/api/login': ['POST', 'OPTIONS'],
     '/api/logout': ['POST']
 };
+//need permissions
 var lockedPath = {
     '/api/users': {
         method: ['GET'],

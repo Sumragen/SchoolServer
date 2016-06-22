@@ -4,9 +4,10 @@
 var _ = require('lodash'),
     libs = process.cwd() + '/app/libs/',
     Teacher = require(libs + 'model/teacher'),
+    User = require(libs + 'model/user'),
     log = require(libs + 'log');
 
-function checkOnError(err, item, next){
+function checkOnError(err, item, next) {
     if (err) {
         res.status(err.code).send({message: err});
     } else if (!item) {
@@ -39,7 +40,28 @@ module.exports = function (app) {
     app.get('/api/teachers', function (req, res) {
         Teacher.find(function (err, teachers) {
             checkOnError(err, teachers, function () {
-                res.status(200).json(teachers);
+                User.find(function (err, users) {
+                    checkOnError(err, users, function () {
+                        var resBody = [];
+                        _.each(teachers, function (teacher) {
+                            _.every(users, function (user) {
+                                if (user._id.id == teacher.user.id) {
+                                    resBody.push({
+                                        subjects : teacher.subjects,
+                                        user : {
+                                            id: user._id,
+                                            name: user.first_name + ' ' + user.last_name
+                                        },
+                                        _id : teacher._id
+                                    });
+                                    return false;
+                                }
+                                return true;
+                            })
+                        });
+                        res.status(200).json(resBody);
+                    })
+                });
             });
         });
     });
@@ -76,9 +98,9 @@ module.exports = function (app) {
         Teacher.findById(req.params.id, function (err, teacher) {
             checkOnError(err, teacher, function () {
                 teacher.remove(function (err) {
-                    if(err){
+                    if (err) {
                         res.status(err.code).send({message: err});
-                    }else{
+                    } else {
                         res.status(200).send({message: 'Teacher deleted'});
                     }
                 })

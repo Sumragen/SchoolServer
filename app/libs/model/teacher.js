@@ -14,15 +14,9 @@ var mongoose = require('mongoose'),
  */
 var Teacher = new Schema({
     user: {
-        id: {
-            type: Schema.Types.ObjectId,
-            ref: 'User',
-            default: new mongoose.Types.ObjectId
-        },
-        name: {
-            type: String,
-            default: 'default teacher name'
-        }
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        default: new mongoose.Types.ObjectId
     },
     subjects: [{
         type: Schema.Types.ObjectId,
@@ -30,5 +24,4 @@ var Teacher = new Schema({
         default: new mongoose.Types.ObjectId
     }]
 });
-
 module.exports = mongoose.model('Teacher', Teacher);

@@ -149,10 +149,7 @@ module.exports = function (app) {
                                                     teacher.subjects = subjects;
                                                 } else {
                                                     teacher = new Teacher({
-                                                        user: {
-                                                            id: reqBody.id,
-                                                            name: user.first_name + ' ' + user.last_name
-                                                        },
+                                                        user: user._id,
                                                         subjects: subjects
                                                     });
                                                 }

@@ -53,7 +53,7 @@ module.exports = function (app) {
         })
     });
     app.get('/api/subject/teacher/:id', function (req, res) {
-        Teacher.find({"user.id": req.params.id}, function (err, teacher) {
+        Teacher.find({"user": req.params.id}, function (err, teacher) {
             if (teacher[0] && !err && req) {
                 Subject.find(function (err, subjects) {
                     if (subjects && !err) {

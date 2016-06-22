@@ -47,7 +47,7 @@ var p = permissionSet;
 var admin = {
     name: 'admin',
     description: 'admin rights',
-    weight : 90,
+    weight: 90,
     permissions: [p.isTeacher, p.hasAdminRights, p.canViewUsers, p.canEditUser, p.canAddUsers,
         p.canDeleteUsers, p.canViewSchedule, p.canEditSchedule, p.canAddSchedule, p.canDeleteSchedule,
         p.canViewEvents, p.canEditEvents, p.canAddEvents, p.canDeleteEvents, p.canViewStages, p.canEditStages, p.canAddStages, p.canDeleteStages]
@@ -55,7 +55,7 @@ var admin = {
 var teacher = {
     name: 'teacher',
     description: 'teacher rights',
-    weight : 50,
+    weight: 50,
     permissions: [p.isTeacher,
         p.canViewUsers, p.canEditUser, p.canViewSchedule, p.canViewEvents, p.canEditEvents, p.canAddEvents, p.canDeleteEvents]
 };
@@ -102,7 +102,7 @@ var events = [
         name: 'Rest',
         date: 'February 19, 2016 11:50 AM',
         description: 'first event (test version)',
-        address:{
+        address: {
             city: 'Kherson',
             country: 'Ukraine'
         },
@@ -115,7 +115,7 @@ var events = [
         name: "Children's hospital",
         date: 'September 23, 2016 2:30 PM',
         description: 'Medical inspection',
-        address:{
+        address: {
             city: 'Kherson',
             country: 'Ukraine'
         },
@@ -128,7 +128,7 @@ var events = [
         name: 'spring ball',
         date: 'April 15, 2016 4:00 PM',
         description: 'spring ball',
-        address:{
+        address: {
             city: 'Kherson',
             country: 'Ukraine'
         },
@@ -327,18 +327,22 @@ Lesson.remove({}, function (err) {
         })
     })
 });
-Stage.remove({}, function (err) {
-    _.each(stages, function (data) {
-        var stage = new Stage(data);
-        stage.save(function (err, stage) {
-            if (!err) {
-                log.info("New stage - %s-%s", stage.stage, stage.suffix);
-            } else {
-                return log.error(err);
-            }
-        })
-    })
-});
+setTimeout(function () {
+    Stage.remove({}, function (err) {
+        Teacher.find(function (err, teachers) {
+            _.each(stages, function (data) {
+                var stage = new Stage(_.merge(data, {formMaster: teachers[0]._id}));
+                stage.save(function (err, stage) {
+                    if (!err) {
+                        log.info("New stage - %s-%s", stage.stage, stage.suffix);
+                    } else {
+                        return log.error(err);
+                    }
+                })
+            })
+        });
+    });
+}, 4000);
 Subject.remove({}, function (err) {
     _.each(subjects, function (data) {
         var subject = new Subject(data);
@@ -359,12 +363,12 @@ setTimeout(function () {
                 _.each(users, function (user) {
                     var teacher = new Teacher({
                         user: user._id,
-                        subjects: [subjects[0]._id,subjects[1]._id]
+                        subjects: [subjects[0]._id, subjects[1]._id]
                     });
                     teacher.save(function (err, teacher) {
-                        if(!err){
+                        if (!err) {
                             log.info('New teacher');
-                        }else{
+                        } else {
                             return log.error(err);
                         }
                     })
@@ -372,7 +376,7 @@ setTimeout(function () {
             })
         });
     });
-}, 5000);
+}, 2000);
 
 Client.remove({}, function (err) {
     var client = new Client({
