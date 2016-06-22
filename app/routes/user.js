@@ -5,6 +5,7 @@ var _ = require('lodash'),
     libs = process.cwd() + '/app/libs/',
     User = require(libs + 'model/user'),
     Role = require(libs + 'model/role'),
+    Stage = require(libs + 'model/stage'),
     Teacher = require(libs + 'model/teacher'),
     log = require(libs + 'log')(module),
     config = require(libs + 'config');
@@ -14,28 +15,25 @@ module.exports = function (app) {
      * Login
      */
     app.post('/api/login', function (request, response) {
-        User.find({username: request.body.username}, function (err, user) {
-            if (err) {
-                response.status(404).json(err);
-            } else if (user.length <= 0) {
-                response.status(404).json({message: 'User not found'});
-            } else if (user[0].checkPassword(request.body.password)) {
-                request.headerSession.getSession()
-                    .then(function (session) {
-                        session['userId'] = user[0]._id;
-                        var currentUser = user[0].getValues();
-                        Role.findById(currentUser.roles[0], function (err, role) {
-                            currentUser.roles[0] = role;
+        User.findOne({username: request.body.username})
+            .populate('roles')
+            .exec(function (err, user) {
+                if (err || !user) {
+                    response.status(404).send({message: 'User not found'});
+                } else if (user.checkPassword(request.body.password)) {
+                    request.headerSession.getSession()
+                        .then(function (session) {
+                            session['userId'] = user._id;
+                            session['user'] = user;
                             response.status(200).json({
-                                currentUser: currentUser,
+                                currentUser: user.getValues(),
                                 sessionID: request.headerSession.token
                             });
-                        });
-                    });
-            } else {
-                response.status(404).send({message: 'User not found'});
-            }
-        });
+                        })
+                } else {
+                    response.status(404).send({message: 'User not found'});
+                }
+            });
     });
 
     /**
@@ -163,7 +161,23 @@ module.exports = function (app) {
                                             }
                                         })
                                     } else {
-                                        response.status(200).json(user);
+                                        Stage.find()
+                                            .populate('formMaster')
+                                            .exec(function (err, stages) {
+                                                if (_.every(stages, function (stage) {
+                                                        return stage.formMaster.user.id != user._id.id
+                                                    })) {
+                                                    Teacher.remove({'user': reqBody.id}, function (err) {
+                                                        if (err) {
+                                                            response.status(500).send({message: err});
+                                                        } else {
+                                                            response.status(200).json(user);
+                                                        }
+                                                    });
+                                                } else {
+                                                    response.status(400).send({message: 'That user is form master'});
+                                                }
+                                            });
                                     }
                                 } else {
                                     response.status(500).send({message: err});

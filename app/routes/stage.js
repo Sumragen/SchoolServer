@@ -38,43 +38,38 @@ module.exports = function (app) {
     /**
      * Read
      */
+    function createResponseBody(stage) {
+        return {
+            formMaster: {
+                id: stage.formMaster._id,
+                name: stage.formMaster.user.first_name + ' ' + stage.formMaster.user.last_name
+            },
+            stage: stage.stage,
+            suffix: stage.suffix,
+            _id: stage._id
+        }
+    }
+
     app.get('/api/stages', function (req, res) {
-        Stage.find(function (err, stages) {
-            checkOnError(res, err, stages, function () {
-                Teacher.find(function (err, teachers) {
-                    checkOnError(res, err, teachers, function () {
-                        User.find(function (err, users) {
-                            checkOnError(res, err, users, function () {
-                                var resBody = [];
-                                _.each(stages, function (stage) {
-                                    _.every(teachers, function (teacher) {
-                                        if (stage.formMaster.id == teacher._id.id) {
-                                            _.every(users, function (user) {
-                                                if (teacher.user.id == user._id.id) {
-                                                    resBody.push({
-                                                        formMaster: {
-                                                            id: teacher._id,
-                                                            name: user.first_name + ' ' + user.last_name
-                                                        },
-                                                        stage: stage.stage,
-                                                        suffix: stage.suffix,
-                                                        _id: stage._id
-                                                    });
-                                                    return false;
-                                                }
-                                                return true;
-                                            })
-                                        }
-                                        return true;
-                                    })
-                                });
-                                res.status(200).json(resBody);
-                            });
+        Stage.find()
+            .populate('formMaster')
+            .exec(function (err, stages) {
+                var options = {
+                    path: 'formMaster.user',
+                    model: 'User'
+                };
+                if (err) {
+                    res.status(500).send({message: err});
+                } else {
+                    Stage.populate(stages, options, function (err, stages) {
+                        var responseBody = [];
+                        _.each(stages, function (stage) {
+                            responseBody.push(createResponseBody(stage))
                         });
+                        res.status(200).send(responseBody);
                     });
-                });
-            });
-        });
+                }
+            })
     });
 
     app.get('/api/stage/:id', function (req, res) {
@@ -89,34 +84,33 @@ module.exports = function (app) {
      * Update
      */
     app.post('/api/stage/:id', function (req, res) {
-        Stage.findById(req.params.id, function (err, stage) {
-            checkOnError(res, err, stage, function () {
-                Teacher.findById(req.body.formMaster, function (err, teacher) {
-                    checkOnError(res, err, teacher, function () {
-                        stage.formMaster = teacher._id;
-                        User.findById(teacher.user, function (err, user) {
-                            checkOnError(res, err, user, function () {
-                                stage.save(function (err) {
-                                    if (err) {
-                                        res.status(err.code).send({message: err});
-                                    } else {
-                                        res.status(200).send({
-                                            stage: stage.stage,
-                                            suffix: stage.suffix,
-                                            formMaster: {
-                                                id: teacher._id,
-                                                name: user.first_name + ' ' + user.last_name
-                                            },
-                                            _id: stage._id
-                                        });
-                                    }
-                                })
+        Stage.findById(req.params.id)
+            .exec(function (err, stage) {
+                stage.formMaster = req.body.formMaster;
+                var options = {
+                    path: 'formMaster',
+                    model: 'Teacher'
+                };
+                Stage.populate(stage, options, function (err, stage) {
+                    var options = {
+                        path: 'formMaster.user',
+                        model: 'User'
+                    };
+                    Stage.populate(stage, options, function (err, stage) {
+                        if (err) {
+                            res.status(500).send({message: err});
+                        } else {
+                            stage.save(function (err) {
+                                if (err) {
+                                    res.status(500);
+                                } else {
+                                    res.status(200).send(createResponseBody(stage));
+                                }
                             });
-                        });
+                        }
                     });
                 });
             });
-        })
     });
     /**
      * Delete
