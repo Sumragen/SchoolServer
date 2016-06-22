@@ -2,11 +2,9 @@
  * Created by trainee on 6/3/16.
  */
 'use strict';
-var path = require('path'),
-    http = require('http'),
+var http = require('http'),
     express = require('express'),
     app = express(),
-    _ = require('lodash'),
     bodyParser = require('body-parser'),
     cookieParser = require('cookie-parser'),
     headerSession = require('node-header-session'),
@@ -16,117 +14,25 @@ var path = require('path'),
     router = require('./router'),
     config = require(libs + 'config'),
     oauth2 = require(libs + 'auth/oauth2'),
-    User = require(libs + 'model/user'),
-    Role = require(libs + 'model/role'),
+    accessControl = require('./auth/accessControl'),
     log = require(libs + 'log')(module);
 
 var port = config.get('port');
 var host = config.get('host');
-var defaultHeaders = {
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Headers': 'X-Requested-With,Access-Control-Allow-Origin,Content-Type,Accept,X-Sessionid',
-    'Access-Control-Allow-Methods': 'POST, GET, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Origin': '*'
-};
-//configure
+
 app.use(bodyParser.json());
+app.use(cookieParser('foo'));
 app.use(morgan('dev'));
 app.use(passport.initialize());
-//require(libs + 'auth/auth');
 app.use(function (req, res, next) {
-    res.set(defaultHeaders);
+    res.set(config.get('default').headers);
     next();
 });
+headerSession(app, config.get('default').headerSession);
 
-app.use(cookieParser('foo'));
-headerSession(app, {
-    name: 'x-sessionID',
-    debug: false,
-    root: '/api'
-});
-
-var permissionSet = {
-    'isTeacher': 1,
-    'hasAdminRights': 2,
-    'canViewUsers': 3,
-    'canEditUser': 4,
-    'canAddUsers': 5,
-    'canDeleteUsers': 6,
-    'canViewSchedule': 7,
-    'canEditSchedule': 8,
-    'canAddSchedule': 9,
-    'canDeleteSchedule': 10,
-    'canViewEvents': 11,
-    'canEditEvents': 12,
-    'canAddEvents': 13,
-    'canDeleteEvents': 14,
-    'canViewStages': 15,
-    'canEditStages': 16,
-    'canAddStages': 17,
-    'canDeleteStages': 18
-};
-var p = permissionSet;
-//don't need session
-var unsafePath = {
-    '/api/login': ['POST', 'OPTIONS'],
-    '/api/logout': ['POST']
-};
-//need permissions
-var lockedPath = {
-    '/api/users': {
-        method: ['GET'],
-        permissions: [p.canViewUsers]
-    },
-    '/api/stages': {
-        method: ['GET'],
-        permissions: [p.canViewStages]
-    }
-};
 //handle authorized user
-app.use(function (req, res, next) {
-    console.log('---------------------------------------');
-    console.log(req.headerSession.token);
-    if (req.method == 'OPTIONS') {
-        res.status(200).send({message: 'done'});
-    } else {
-        //is path need session
-        if (unsafePath[req.url] && unsafePath[req.url].length > 0 && unsafePath[req.url].indexOf(req.method) > -1) {
-            next();
-        } else {
-            //is path need some permission
-            if (lockedPath[req.url.split('?')[0]]) {
-                req.headerSession.getSession()
-                    .then(function (session) {
-                        if (!session.userId) {
-                            res.status(401).send({message: 'Please login'});
-                        } else {
-                            User.findById(session.userId, function (err, user) {
-                                if (user && !err) {
-                                    Role.findById(user.roles[0], function (err, role) {
-                                        if (role && !err) {
-                                            if (_.every(lockedPath[req.url.split('?')[0]].permissions, function (perm) {
-                                                    return role.permissions.indexOf(perm) > -1;
-                                                })) {
-                                                next();
-                                            } else {
-                                                res.status(403).send({message: 'Access denied'});
-                                            }
-                                        } else {
-                                            res.status(err.code || 404).send({message: err || 'Role not found'});
-                                        }
-                                    });
-                                } else {
-                                    res.status(err.code || 404).send({message: err || 'User not found'});
-                                }
-                            });
-                        }
-                    });
-            } else {
-                next();
-            }
-        }
-    }
-});
+accessControl.checkPath(app);
+
 //catch errors
 /*
  app.use(function (req, res, next) {

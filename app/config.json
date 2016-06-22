@@ -1,25 +1,36 @@
 {
-  "port" : 3000,
-  "host" : "localhost",
+  "port": 3000,
+  "host": "localhost",
   "security": {
-      "tokenLife" : 3600
+    "tokenLife": 3600
   },
-  "mongoose" :{
+  "mongoose": {
     "uri": "mongodb://localhost:27017/SchoolDB"
   },
-  "cookie" : {
-    "secret" : "JAS1f4-ASK981",
-    "maxAge" : 360000
+  "cookie": {
+    "secret": "JAS1f4-ASK981",
+    "maxAge": 360000
   },
-  "default" : {
-    "stage" :{
-      "min" : 1,
-      "max" : 11
+  "default": {
+    "headers": {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Headers": "X-Requested-With,Access-Control-Allow-Origin,Content-Type,Accept,X-Sessionid",
+      "Access-Control-Allow-Methods": "POST, GET, PUT, DELETE, OPTIONS",
+      "Access-Control-Allow-Origin": "*"
     },
-    "lesson" : {
-      "max" : 8
+    "headerSession" : {
+      "name": "x-sessionID",
+      "debug": false,
+      "root": "/api"
     },
-    "role" : "student",
+    "stage": {
+      "min": 1,
+      "max": 11
+    },
+    "lesson": {
+      "max": 8
+    },
+    "role": "student",
     "client": {
       "name": "Android API v1",
       "clientId": "android",

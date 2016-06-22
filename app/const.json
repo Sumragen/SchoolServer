@@ -1,0 +1,22 @@
+{
+  "permissionSet": {
+    "isTeacher": 1,
+    "hasAdminRights": 2,
+    "canViewUsers": 3,
+    "canEditUser": 4,
+    "canAddUsers": 5,
+    "canDeleteUsers": 6,
+    "canViewSchedule": 7,
+    "canEditSchedule": 8,
+    "canAddSchedule": 9,
+    "canDeleteSchedule": 10,
+    "canViewEvents": 11,
+    "canEditEvents": 12,
+    "canAddEvents": 13,
+    "canDeleteEvents": 14,
+    "canViewStages": 15,
+    "canEditStages": 16,
+    "canAddStages": 17,
+    "canDeleteStages": 18
+  }
+}
