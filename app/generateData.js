@@ -6,9 +6,10 @@ var _ = require('lodash');
 
 var libs = process.cwd() + '/app/libs/';
 
-var log = require(libs + 'log')(module);
-var db = require(libs + 'db/mongoose');
-var config = require(libs + 'config');
+var log = require(libs + 'log')(module),
+    db = require(libs + 'db/mongoose'),
+    config = require(libs + 'config'),
+    consts = require('./const.json');
 
 // models
 var User = require(libs + 'model/user'),
@@ -22,312 +23,110 @@ var User = require(libs + 'model/user'),
     AccessToken = require(libs + 'model/accessToken'),
     RefreshToken = require(libs + 'model/refreshToken');
 
+//default data
+var roles = require('./data/roles').get(),
+    users = require('./data/users').get(),
+    events = require('./data/events').get(),
+    lessons = require('./data/lessons').get(),
+    stages = require('./data/stages').get(),
+    subjects = require('./data/subjects').get();
 
-var permissionSet = {
-    'isTeacher': 1,
-    'hasAdminRights': 2,
-    'canViewUsers': 3,
-    'canEditUser': 4,
-    'canAddUsers': 5,
-    'canDeleteUsers': 6,
-    'canViewSchedule': 7,
-    'canEditSchedule': 8,
-    'canAddSchedule': 9,
-    'canDeleteSchedule': 10,
-    'canViewEvents': 11,
-    'canEditEvents': 12,
-    'canAddEvents': 13,
-    'canDeleteEvents': 14,
-    'canViewStages': 15,
-    'canEditStages': 16,
-    'canAddStages': 17,
-    'canDeleteStages': 18
+var order = {
+    'Role': 1,
+    'User': 2, //role
+    'Subject': 3,
+    'Teacher': 4, //user, subject
+    'Stage': 5, //teacher
+    'Event': 6,
+    'Lesson': 7, //stage, teacher, subject
 };
-var p = permissionSet;
-var admin = {
-    name: 'admin',
-    description: 'admin rights',
-    weight: 90,
-    permissions: [p.isTeacher, p.hasAdminRights, p.canViewUsers, p.canEditUser, p.canAddUsers,
-        p.canDeleteUsers, p.canViewSchedule, p.canEditSchedule, p.canAddSchedule, p.canDeleteSchedule,
-        p.canViewEvents, p.canEditEvents, p.canAddEvents, p.canDeleteEvents, p.canViewStages, p.canEditStages, p.canAddStages, p.canDeleteStages]
-};
-var teacher = {
-    name: 'teacher',
-    description: 'teacher rights',
-    weight: 50,
-    permissions: [p.isTeacher,
-        p.canViewUsers, p.canEditUser, p.canViewSchedule, p.canViewEvents, p.canEditEvents, p.canAddEvents, p.canDeleteEvents]
-};
-var student = {
-    name: 'student',
-    description: 'student rights',
-    weight: 10,
-    permissions: [p.canViewUsers,
-        p.canEditUser, p.canViewSchedule, p.canViewEvents]
-};
-var roles = [admin, teacher, student];
-var source = {
-    user: {
-        objects: [
-            {
-                first_name: 'Eric',
-                last_name: 'Tituashvili',
-                username: 'admin',
-                email: 'Davidich@smotra.ru',
-                password: 'admin',
-                roles: ['admin']
-            },
-            {
-                first_name: 'Aleksey',
-                last_name: 'Zarrubin',
-                username: 'teacher',
-                email: 'zarrubin@24auto.ru',
-                password: 'teacher',
-                roles: ['teacher']
-            },
-            {
-                first_name: 'George',
-                last_name: 'Chivchan',
-                username: 'student',
-                email: 'Gocha@gmail.com',
-                password: 'student',
-                roles: ['student']
-            }
-        ]
-    }
-};
-var events = [
-    {
-        name: 'Rest',
-        date: 'February 19, 2016 11:50 AM',
-        description: 'first event (test version)',
-        address: {
-            city: 'Kherson',
-            country: 'Ukraine'
-        },
-        location: {
-            latitude: 46.6699334,
-            longitude: 32.6169105
-        }
-    },
-    {
-        name: "Children's hospital",
-        date: 'September 23, 2016 2:30 PM',
-        description: 'Medical inspection',
-        address: {
-            city: 'Kherson',
-            country: 'Ukraine'
-        },
-        location: {
-            latitude: 46.6676171,
-            longitude: 32.6100075
-        }
-    },
-    {
-        name: 'spring ball',
-        date: 'April 15, 2016 4:00 PM',
-        description: 'spring ball',
-        address: {
-            city: 'Kherson',
-            country: 'Ukraine'
-        },
-        location: {
-            latitude: 46.6716115,
-            longitude: 32.6100684
-        }
-    }
-];
-var lessons = [
-    {
-        stage: '1',
-        suffix: 'A',
-        classroom: 220,
-        day: 'Monday',
-        order: [1, 3]
-    },
-    {
-        stage: '4',
-        suffix: 'A',
-        classroom: 305,
-        day: 'Tuesday',
-        order: [2]
-    },
-    {
-        stage: '2',
-        suffix: 'A',
-        classroom: 216,
-        day: 'Wednesday',
-        order: [1]
-    },
-    {
-        stage: '11',
-        suffix: 'A',
-        classroom: 101,
-        day: 'Thursday',
-        order: [4]
-    },
-    {
-        stage: '8',
-        suffix: 'A',
-        classroom: 306,
-        day: 'Friday',
-        order: [1, 3]
-    },
-    {
-        stage: '2',
-        suffix: 'A',
-        classroom: 106,
-        day: 'Wednesday',
-        order: [0, 2]
-    },
-    {
-        stage: '5',
-        suffix: 'B',
-        classroom: 207,
-        day: 'Wednesday',
-        order: [1, 2]
-    }
-];
-var stages = [
-    {
-        stage: 5,
-        suffix: 'A',
-    },
-    {
-        stage: 11,
-        suffix: 'A',
-    },
-    {
-        stage: 11,
-        suffix: 'B',
-    },
-    {
-        stage: 1,
-        suffix: 'A',
-    },
-    {
-        stage: 2,
-        suffix: 'A',
-    },
-    {
-        stage: 3,
-        suffix: 'A',
-    },
-    {
-        stage: 4,
-        suffix: 'A',
-    },
-    {
-        stage: 5,
-        suffix: 'B',
-    },
-    {
-        stage: 6,
-        suffix: 'A',
-    },
-    {
-        stage: 7,
-        suffix: 'A',
-    },
-    {
-        stage: 8,
-        suffix: 'A',
-    },
-    {
-        stage: 9,
-        suffix: 'A',
-    },
-    {
-        stage: 10,
-        suffix: 'A',
-    }
-];
-var subjects = [
-    {
-        name: 'History',
-        teachers: [],
-        classRooms: [202]
-    },
-    {
-        name: 'Mathematics',
-        teachers: [],
-        classRooms: [202]
-    },
-    {
-        name: 'Biology',
-        teachers: [],
-        classRooms: [202]
-    },
-    {
-        name: 'Astronomy',
-        teachers: [],
-        classRooms: [202]
-    },
-    {
-        name: 'Literature',
-        teachers: [],
-        classRooms: [202]
-    }
-];
+var interval = 1000;
 
-
-Role.remove({}, function (err) {
-    _.each(roles, function (data) {
-        var role = new Role(data);
-        role.save(function (err, role) {
-            if (!err) {
-                log.info("New role - %s", role.name);
-            } else {
-                return log.error(err);
-            }
-        })
-    })
-});
-User.remove({}, function (err) {
-    Role.find(function (err, roles) {
-        _.each(source.user.objects, function (userEntity) {
-            var userRoles = _.filter(roles, function (r) {
-                return r.name == userEntity.roles[0]
-            });
-            delete userEntity.roles;
-            var user = new User(userEntity);
-            user.roles.push(userRoles[0]._id);
-            user.save(function (err, data) {
+function setOrder(name, next) {
+    setTimeout(function () {
+        console.log('---- ' + order[name] + ' ----');
+        next();
+    }, order[name] * interval);
+}
+setOrder('Role', function () {
+    Role.remove({}, function (err) {
+        _.each(roles, function (data) {
+            var role = new Role(data);
+            role.save(function (err, role) {
                 if (!err) {
-                    log.info("New user - %s:%s", data.username, data.password);
+                    log.info("New role - %s", role.name);
                 } else {
                     return log.error(err);
                 }
+            })
+        })
+    });
+});
+setOrder('User', function () {
+    User.remove({}, function (err) {
+        Role.find(function (err, roles) {
+            _.each(users, function (userEntity) {
+                var userRoles = _.filter(roles, function (r) {
+                    return r.name == userEntity.roles[0]
+                });
+                delete userEntity.roles;
+                var user = new User(userEntity);
+                user.roles.push(userRoles[0]._id);
+                user.save(function (err, data) {
+                    if (!err) {
+                        log.info("New user - %s:%s", data.username, data.password);
+                    } else {
+                        return log.error(err);
+                    }
+                });
             });
         });
     });
 });
-Event.remove({}, function (err) {
-    _.each(events, function (data) {
-        var event = new Event(data);
-        event.save(function (err, event) {
-            if (!err) {
-                log.info("New event - %s", event.name);
-            } else {
-                return log.error(err);
-            }
+setOrder('Event', function () {
+    Event.remove({}, function (err) {
+        _.each(events, function (data) {
+            var event = new Event(data);
+            event.save(function (err, event) {
+                if (!err) {
+                    log.info("New event - %s", event.name);
+                } else {
+                    return log.error(err);
+                }
+            })
         })
-    })
+    });
 });
-Lesson.remove({}, function (err) {
-    _.each(lessons, function (data) {
-        var lesson = new Lesson(data);
-        lesson.save(function (err, lesson) {
-            if (!err) {
-                log.info("New lesson");
-            } else {
-                return log.error(err);
-            }
-        })
-    })
+setOrder('Lesson', function () {
+    Lesson.remove({}, function (err) {
+        Stage.find()
+            .exec(function (err, stages) {
+                if (!err) {
+                    Subject.find()
+                        .exec(function (err, subjects) {
+                            if(!err){
+                                Teacher.find(function (err, teachers) {
+                                    _.each(lessons, function (data, index) {
+                                        var lesson = new Lesson(data);
+                                        lesson.stage = stages[index]._id;
+                                        lesson.subject = subjects[0]._id;
+                                        lesson.teacher = teachers[0]._id;
+                                        lesson.save(function (err, lesson) {
+                                            if (!err) {
+                                                log.info("New lesson for %s-%s", stages[index].stage, stages[index].suffix);
+                                            } else {
+                                                return log.error(err);
+                                            }
+                                        })
+                                    })
+                                });
+                            }
+                        });
+                }
+            });
+    });
 });
-setTimeout(function () {
+setOrder('Stage', function () {
     Stage.remove({}, function (err) {
         Teacher.find(function (err, teachers) {
             _.each(stages, function (data) {
@@ -342,21 +141,22 @@ setTimeout(function () {
             })
         });
     });
-}, 4000);
-Subject.remove({}, function (err) {
-    _.each(subjects, function (data) {
-        var subject = new Subject(data);
-        subject.save(function (err, subject) {
-            if (!err) {
-                log.info("New subject - %s", subject.name);
-            } else {
-                return log.error(err);
-            }
-        })
-    })
 });
-
-setTimeout(function () {
+setOrder('Subject', function () {
+    Subject.remove({}, function (err) {
+        _.each(subjects, function (data) {
+            var subject = new Subject(data);
+            subject.save(function (err, subject) {
+                if (!err) {
+                    log.info("New subject - %s", subject.name);
+                } else {
+                    return log.error(err);
+                }
+            })
+        })
+    });
+});
+setOrder('Teacher', function () {
     Teacher.remove({}, function (err) {
         User.find(function (err, users) {
             Subject.find(function (err, subjects) {
@@ -376,7 +176,7 @@ setTimeout(function () {
             })
         });
     });
-}, 2000);
+});
 
 Client.remove({}, function (err) {
     var client = new Client({
@@ -394,13 +194,11 @@ Client.remove({}, function (err) {
 
     });
 });
-
 AccessToken.remove({}, function (err) {
     if (err) {
         return log.error(err);
     }
 });
-
 RefreshToken.remove({}, function (err) {
     if (err) {
         return log.error(err);

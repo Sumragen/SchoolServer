@@ -28,6 +28,7 @@
       "max": 11
     },
     "lesson": {
+      "min" : 0,
       "max": 8
     },
     "role": "student",

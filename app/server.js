@@ -25,10 +25,10 @@ app.use(cookieParser('foo'));
 app.use(morgan('dev'));
 app.use(passport.initialize());
 app.use(function (req, res, next) {
-    res.set(config.get('default').headers);
+    res.set(config.get('default:headers'));
     next();
 });
-headerSession(app, config.get('default').headerSession);
+headerSession(app, config.get('default:headerSession'));
 
 //handle authorized user
 accessControl.checkPath(app);

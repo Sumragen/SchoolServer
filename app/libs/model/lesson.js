@@ -31,16 +31,13 @@ var Lesson = new Schema({
     },
     teacher: {
         type: Schema.Types.ObjectId,
-        ref : 'User',
+        ref : 'Teacher',
         default: new mongoose.Types.ObjectId
     },
     stage : {
-        type: Number,
-        required: true
-    },
-    suffix: {
-        type: String,
-        required: true
+        type: Schema.Types.ObjectId,
+        ref : 'Stage',
+        default : new mongoose.Types.ObjectId
     },
     classroom : {
         type: Number,
@@ -51,15 +48,12 @@ var Lesson = new Schema({
         enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
         required : true
     },
-    order: [{
+    order: {
         type: Number,
         required: true,
-        min: 0,
+        min: config.get('default:lesson:min'),
         max: config.get('default:lesson:max')
-    }]
-});
-Lesson.path('suffix').validate(function (v) {
-    return v.length == 1;
+    }
 });
 
 module.exports = mongoose.model('Lesson', Lesson);
