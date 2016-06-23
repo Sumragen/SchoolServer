@@ -7,7 +7,7 @@ function checkPath(req, res, next) {
     if (path.registered.authorizationPath[req.url.split('?')[0]]) {
         req.headerSession.getSession()
             .then(function (session) {
-                if (session.userId && session.user) {
+                if (session.user) {
                     if (_.every(path.registered.authorizationPath[req.url.split('?')[0]].permissions, function (perm) {
                             return session.user.roles[0].permissions.indexOf(perm) > -1;
                         })) {

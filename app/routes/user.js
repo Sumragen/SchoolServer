@@ -23,7 +23,6 @@ module.exports = function (app) {
                 } else if (user.checkPassword(request.body.password)) {
                     request.headerSession.getSession()
                         .then(function (session) {
-                            session['userId'] = user._id;
                             session['user'] = user;
                             response.status(200).json({
                                 currentUser: user.getValues(),
@@ -88,13 +87,17 @@ module.exports = function (app) {
         // List
     app.get('/api/users', function (request, response) {
         User.find(function (err, users) {
-            var result = _.map(users, function (user) {
-                return user.getValues();
-            });
-            if (request.query.limit && request.query.offset) {
-                response.json(result.splice(Number(request.query.offset), Number(request.query.limit)))
+            if (err || !users) {
+                response.status(500).send({message: err || 'Users not found'});
             } else {
-                response.json(result);
+                var result = _.map(users, function (user) {
+                    return user.getValues();
+                });
+                if (request.query.limit && request.query.offset) {
+                    response.status(200).json(result.splice(Number(request.query.offset), Number(request.query.limit)))
+                } else {
+                    response.status(200).json(result);
+                }
             }
         });
     });
@@ -119,10 +122,8 @@ module.exports = function (app) {
             response.status(400);
         } else {
             User.findById(request.params.id, function (err, user) {
-                if (err) {
-                    response.status(500).send({message: err});
-                } else if (!user) {
-                    response.status(404).send({message: 'User not found'});
+                if (err || !user) {
+                    response.status(!user ? 404 : 500).send({message: !user ? 'User not found' : err})
                 } else {
                     var reqBody = request.body;
                     user.first_name = reqBody.first_name;
@@ -131,54 +132,59 @@ module.exports = function (app) {
                     user.email = reqBody.email;
                     Role.findById(reqBody.role, function (err, role) {
                         if (!err && role) {
-                            user.roles = [role._id];
+                            user.roles = [role];
                             user.save(function (err, user) {
                                 if (!err) {
-                                    //save teacher data
-                                    if (role.weight >= 50 && reqBody.subjects && reqBody.subjects.length > 0) {
-                                        Teacher.findOne({'user': reqBody.id}, function (err, teacher) {
-                                            if (err) {
-                                                response.status(500).send({message: err});
-                                            } else {
-                                                var subjects = _.map(reqBody.subjects, function (subject) {
-                                                    return subject.id;
-                                                });
-                                                if (teacher) {
-                                                    teacher.subjects = subjects;
-                                                } else {
-                                                    teacher = new Teacher({
-                                                        user: user._id,
-                                                        subjects: subjects
-                                                    });
-                                                }
-                                                teacher.save(function (err) {
+                                    request.headerSession.getSession()
+                                        .then(function (session) {
+                                            if (session.user._id == user.id) {
+                                                session.user = user;
+                                            }
+                                            if (role.weight >= 50 && reqBody.subjects && reqBody.subjects.length > 0) {
+                                                Teacher.findOne({'user': reqBody.id}, function (err, teacher) {
                                                     if (err) {
                                                         response.status(500).send({message: err});
                                                     } else {
-                                                        response.status(200).json(user.getValues());
-                                                    }
-                                                });
-                                            }
-                                        })
-                                    } else {
-                                        Stage.find()
-                                            .populate('formMaster')
-                                            .exec(function (err, stages) {
-                                                if (_.every(stages, function (stage) {
-                                                        return stage.formMaster.user.id != user._id.id
-                                                    })) {
-                                                    Teacher.remove({'user': reqBody.id}, function (err) {
-                                                        if (err) {
-                                                            response.status(500).send({message: err});
+                                                        var subjects = _.map(reqBody.subjects, function (subject) {
+                                                            return subject.id;
+                                                        });
+                                                        if (teacher) {
+                                                            teacher.subjects = subjects;
                                                         } else {
-                                                            response.status(200).json(user);
+                                                            teacher = new Teacher({
+                                                                user: user._id,
+                                                                subjects: subjects
+                                                            });
+                                                        }
+                                                        teacher.save(function (err) {
+                                                            if (err) {
+                                                                response.status(500).send({message: err});
+                                                            } else {
+                                                                response.status(200).json(user.getValues());
+                                                            }
+                                                        });
+                                                    }
+                                                })
+                                            } else {
+                                                Stage.find()
+                                                    .populate('formMaster')
+                                                    .exec(function (err, stages) {
+                                                        if (_.every(stages, function (stage) {
+                                                                return stage.formMaster.user.id != user._id.id
+                                                            })) {
+                                                            Teacher.remove({'user': reqBody.id}, function (err) {
+                                                                if (err) {
+                                                                    response.status(500).send({message: err});
+                                                                } else {
+                                                                    response.status(200).json(user);
+                                                                }
+                                                            });
+                                                        } else {
+                                                            response.status(400).send({message: 'That user is form master'});
                                                         }
                                                     });
-                                                } else {
-                                                    response.status(400).send({message: 'That user is form master'});
-                                                }
-                                            });
-                                    }
+                                            }
+                                        })
                                 } else {
                                     response.status(500).send({message: err});
                                 }
