@@ -160,14 +160,20 @@ module.exports = function (app) {
                 transformData(newLesson, req.body);
                 //check: is teacher busy
                 if (_.every(lessons, function (existLesson) {
-                        return !(existLesson.day == newLesson.day
-                        && existLesson.order == newLesson.order
-                        && existLesson.teacher.id == newLesson.teacher.id
-                        && existLesson._id != newLesson._id);
+                        if (existLesson.day == newLesson.day
+                            && existLesson.order == newLesson.order
+                            && (existLesson.teacher.id == newLesson.teacher.id || existLesson.classroom == newLesson.classroom)
+                            && existLesson._id.id != newLesson._id.id) {
+                            if (existLesson.teacher.id == newLesson.teacher.id) {
+                                res.status(400).send({message: 'That teacher is busy'})
+                            } else {
+                                res.status(400).send({message: 'That classroom is busy'})
+                            }
+                            return false
+                        }
+                        return true;
                     })) {
                     update(res, newLesson);
-                } else {
-                    res.status(400).send({message: 'That teacher is busy'})
                 }
             });
     });
