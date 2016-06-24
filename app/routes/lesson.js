@@ -129,34 +129,50 @@ module.exports = function (app) {
     /**
      * Update
      */
-    app.post('/api/lesson/:id', function (req, res) {
-        Lesson.findById(req.params.id, function (err, lesson) {
-            checkOnError(res, err, lesson, function () {
-                transformData(lesson, req.body);
-                lesson.save(function (err) {
-                    if (err) {
-                        res.status(err.code).send({message: err});
-                    } else {
-                        var options = {
-                            path: 'stage subject teacher'
-                        };
-                        Lesson.populate(lesson, options, function (err, lesson) {
-                            var options = {
-                                path: 'teacher.user',
-                                model: 'User'
-                            };
-                            Lesson.populate(lesson, options, function (err, lesson) {
-                                if (!err) {
-                                    res.status(200).send(lesson);
-                                } else {
-                                    res.status(500);
-                                }
-                            });
-                        });
-                    }
-                })
-            });
+    function update(res, lesson) {
+        lesson.save(function (err) {
+            if (err) {
+                res.status(500).send({message: err});
+            } else {
+                var options = {
+                    path: 'stage subject teacher'
+                };
+                Lesson.populate(lesson, options, function (err, lesson) {
+                    var options = {
+                        path: 'teacher.user',
+                        model: 'User'
+                    };
+                    Lesson.populate(lesson, options, function (err, lesson) {
+                        if (!err) {
+                            res.status(200).send(lesson);
+                        } else {
+                            res.status(500);
+                        }
+                    });
+                });
+            }
         })
+    }
+
+    app.post('/api/lesson/:id', function (req, res) {
+        Lesson.find()
+            .exec(function (err, lessons) {
+                var newLesson = _.find(lessons, function (lesson) {
+                    return lesson._id == req.params.id;
+                });
+                transformData(newLesson, req.body);
+                //check: is teacher busy
+                if (_.every(lessons, function (existLesson) {
+                        return !(existLesson.day == newLesson.day
+                            && existLesson.order == newLesson.order
+                            && existLesson.teacher.id == newLesson.teacher.id
+                            && existLesson._id != newLesson._id);
+                    })) {
+                    update(res, newLesson);
+                } else {
+                    res.status(400).send({message: 'That teacher is busy'})
+                }
+            });
     });
     /**
      * Delete
