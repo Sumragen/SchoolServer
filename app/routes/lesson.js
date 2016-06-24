@@ -38,29 +38,26 @@ module.exports = function (app) {
                     res.status(500).send({message: err || 'Stage not found'});
                 } else {
                     req.body.stage = stage._id;
-                    var lesson = new Lesson(req.body);
-                    lesson.save(function (err) {
-                        if (err) {
-                            res.status(500).send({message: err});
-                        } else {
-                            var options = {
-                                path: 'stage subject teacher'
-                            };
-                            Lesson.populate(lesson, options, function (err, lesson) {
-                                var options = {
-                                    path: 'teacher.user',
-                                    model: 'User'
-                                };
-                                Lesson.populate(lesson, options, function (err, lesson) {
-                                    if (!err) {
-                                        res.status(200).send(lesson);
-                                    } else {
-                                        res.status(500);
+                    var newLesson = new Lesson(req.body);
+                    Lesson.find()
+                        .exec(function (err, lessons) {
+                            if (_.every(lessons, function (existLesson) {
+                                    if (existLesson.day == newLesson.day
+                                        && existLesson.order == newLesson.order
+                                        && (existLesson.teacher.id == newLesson.teacher.id || existLesson.classroom == newLesson.classroom)
+                                        && existLesson._id.id != newLesson._id.id) {
+                                        if (existLesson.teacher.id == newLesson.teacher.id) {
+                                            res.status(400).send({message: 'That teacher is busy'})
+                                        } else {
+                                            res.status(400).send({message: 'That classroom is busy'})
+                                        }
+                                        return false
                                     }
-                                });
-                            });
-                        }
-                    })
+                                    return true;
+                                })) {
+                                update(res, newLesson);
+                            }
+                        });
                 }
             });
     });
@@ -164,9 +161,9 @@ module.exports = function (app) {
                 //check: is teacher busy
                 if (_.every(lessons, function (existLesson) {
                         return !(existLesson.day == newLesson.day
-                            && existLesson.order == newLesson.order
-                            && existLesson.teacher.id == newLesson.teacher.id
-                            && existLesson._id != newLesson._id);
+                        && existLesson.order == newLesson.order
+                        && existLesson.teacher.id == newLesson.teacher.id
+                        && existLesson._id != newLesson._id);
                     })) {
                     update(res, newLesson);
                 } else {
