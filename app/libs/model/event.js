@@ -36,11 +36,13 @@ var Event = new Schema({
     address: {
         city : {
             type: String,
-            required : true
+            required : true,
+            default: 'default city'
         },
         country : {
             type: String,
-            required: true
+            required: true,
+            default: 'default country'
         }
     },
     location: {

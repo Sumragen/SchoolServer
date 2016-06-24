@@ -24,15 +24,37 @@ module.exports = function (app) {
      * Create
      */
     app.post('/api/stage/add', function (req, res) {
-        var stage = new Stage(req.body);
-        stage.save(function (err) {
-            if (err) {
-                res.send({message: err});
-            } else {
-                log.info('Stage created');
-                res.status(200).json(stage);
-            }
-        })
+        var newStage = new Stage(req.body);
+        Stage.find()
+            .exec(function (err, stages) {
+                checkOnError(res, err, stages, function () {
+                    if (_.every(stages, function (stage) {
+                            return !(stage.stage == newStage.stage && stage.suffix == newStage.suffix)
+                        })) {
+                        newStage.save(function (err) {
+                            if (err) {
+                                res.send({message: err});
+                            } else {
+                                Stage.populate(newStage, {path: 'formMaster'}, function (err, newStage) {
+                                    var options = {
+                                        path: 'formMaster.user',
+                                        model: 'User'
+                                    };
+                                    if (err) {
+                                        res.status(500).send({message: err});
+                                    } else {
+                                        Stage.populate(newStage, options, function (err, newStage) {
+                                            res.status(200).send(createResponseBody(newStage));
+                                        });
+                                    }
+                                });
+                            }
+                        })
+                    } else {
+                        res.status(400).send({message: 'That stage already exist'});
+                    }
+                });
+            });
     });
 
     /**

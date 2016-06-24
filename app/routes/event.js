@@ -6,7 +6,7 @@ var _ = require('lodash'),
     Event = require(libs + 'model/event'),
     log = require(libs + 'log');
 
-function checkOnError(err, item, next){
+function checkOnError(res, err, item, next) {
     if (err) {
         res.status(err.code).send({message: err});
     } else if (!item) {
@@ -22,12 +22,12 @@ module.exports = function (app) {
      * Create
      */
     app.post('/api/event/add', function (req, res) {
+        req.body.date = new Date(req.body.date);
         var event = new Event(req.body);
         event.save(function (err) {
             if (err) {
                 res.send({message: err});
             } else {
-                log.info('Event created');
                 res.status(200).json(event);
             }
         })
@@ -38,7 +38,7 @@ module.exports = function (app) {
      */
     app.get('/api/events', function (req, res) {
         Event.find(function (err, events) {
-            checkOnError(err, events, function () {
+            checkOnError(res, err, events, function () {
                 res.status(200).json(events);
             });
         });
@@ -46,7 +46,7 @@ module.exports = function (app) {
 
     app.get('/api/event/:id', function (req, res) {
         Event.findById(req.params.id, function (err, event) {
-            checkOnError(err, event, function () {
+            checkOnError(res, err, event, function () {
                 res.status(200).json(event);
             });
         })
@@ -55,10 +55,12 @@ module.exports = function (app) {
     /**
      * Update
      */
-    app.put('/api/event/:id', function (req, res) {
+    app.post('/api/event/:id', function (req, res) {
         Event.findById(req.params.id, function (err, event) {
-            checkOnError(err, event, function () {
-                event = req.body;
+            checkOnError(res, err, event, function () {
+                event.date = new Date(req.body.date);
+                event.description = req.body.description;
+                event.name = req.body.name;
                 event.save(function (err) {
                     if (err) {
                         res.status(err.code).send({message: err});
@@ -74,11 +76,11 @@ module.exports = function (app) {
      */
     app.delete('/api/event/:id', function (req, res) {
         Event.findById(req.params.id, function (err, event) {
-            checkOnError(err, event, function () {
+            checkOnError(res, err, event, function () {
                 event.remove(function (err) {
-                    if(err){
+                    if (err) {
                         res.status(err.code).send({message: err});
-                    }else{
+                    } else {
                         res.status(200).send({message: 'Event deleted'});
                     }
                 })
