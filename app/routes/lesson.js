@@ -84,8 +84,17 @@ module.exports = function (app) {
         Lesson.find({stage: req.params.id})
             .populate('stage subject teacher')
             .exec(function (err, lessons) {
-                if (err || !lessons || lessons.length <= 0) {
-                    res.status(err ? 500 : 404).send({message: err || 'Lessons not found'});
+                if (err) {
+                    res.status(500).send({message: err});
+                } else if (!lessons || lessons.length <= 0) {
+                    Stage.findById(req.params.id)
+                        .exec(function (err, stage) {
+                            if (err || !stage) {
+                                res.status(err ? 500 : 404).send({message: err || 'Stage not found'});
+                            } else {
+                                res.status(200).send({stage: stage});
+                            }
+                        });
                 } else {
                     var options = {
                         path: 'teacher.user',
@@ -93,7 +102,7 @@ module.exports = function (app) {
                     };
                     Lesson.populate(lessons, options, function (err, lessons) {
                         if (!err) {
-                            res.status(200).send(lessons);
+                            res.status(200).send({stage: lessons[0].stage, lessons: lessons});
                         } else {
                             res.status(500);
                         }
@@ -196,105 +205,33 @@ module.exports = function (app) {
 
     //default schedule
     app.get('/api/schedule', function (req, res) {
-        var defaultSchedule = {
-            id: 1,
-            stage: 5,
-            suffix: 'A',
-            formMaster: {
-                id: 1,
-                name: 'Lisa Kuddrow'
-            },
-            schedule: [
-                {
-                    name: 'Monday',
-                    lessons: [
-                        {
-                            id: 1,
-                            lesson: 'History',
-                            teacher: 'Victor Kotov',
-                            classroom: 32,
-                            order: [1, 4]
-                        },
-                        {
-                            lesson: 'Math',
-                            teacher: 'Demi Moor',
-                            classroom: 12,
-                            order: [3]
-                        }
-                    ]
-                }, {
-                    name: 'Tuesday',
-                    lessons: [
-                        {
-                            lesson: 'OOP',
-                            teacher: 'Alan Moor',
-                            classroom: 32,
-                            order: [0, 3]
-                        },
-                        {
-                            lesson: 'Math',
-                            teacher: 'Demi Moor',
-                            classroom: 12,
-                            order: [2]
-                        },
-                        {
-                            lesson: 'Math',
-                            teacher: 'Demi Moor',
-                            classroom: 12,
-                            order: [1]
-                        }
-                    ]
-                }, {
-                    name: 'Wednesday',
-                    lessons: [
-                        {
-                            lesson: 'Litrature',
-                            teacher: 'Alan Moor',
-                            classroom: 32,
-                            order: [2, 4]
-                        },
-                        {
-                            lesson: 'Math',
-                            teacher: 'Demi Moor',
-                            classroom: 12,
-                            order: [3]
-                        }
-                    ]
-                }, {
-                    name: 'Thursday',
-                    lessons: [
-                        {
-                            lesson: 'Litrature',
-                            teacher: 'Alan Moor',
-                            classroom: 32,
-                            order: [1, 3]
-                        },
-                        {
-                            lesson: 'Math',
-                            teacher: 'Demi Moor',
-                            classroom: 12,
-                            order: [2]
-                        }
-                    ]
-                }, {
-                    name: 'Friday',
-                    lessons: [
-                        {
-                            lesson: 'Biology',
-                            teacher: 'Alan Moor',
-                            classroom: 32,
-                            order: [1, 3]
-                        },
-                        {
-                            lesson: 'Math',
-                            teacher: 'Demi Moor',
-                            classroom: 12,
-                            order: [2]
-                        }
-                    ]
+        Stage.findOne()
+            .exec(function (err, stage) {
+                if (err) {
+                    res.status(err ? 500 : 404).send({message: err || 'Stage not found'});
+                } else {
+                    Lesson.find({stage: stage._id})
+                        .populate('stage subject teacher')
+                        .exec(function (err, lessons) {
+                            if (err) {
+                                res.status(500).send({message: err});
+                            } else if (!lessons || lessons.length <= 0) {
+                                res.status(200).send({stage: stage});
+                            } else {
+                                var options = {
+                                    path: 'teacher.user',
+                                    model: 'User'
+                                };
+                                Lesson.populate(lessons, options, function (err, lessons) {
+                                    if (!err) {
+                                        res.status(200).send({stage: stage, lessons: lessons});
+                                    } else {
+                                        res.status(500);
+                                    }
+                                });
+                            }
+                        })
                 }
-            ]
-        };
-        res.status(200).send(defaultSchedule);
+            });
     });
 };

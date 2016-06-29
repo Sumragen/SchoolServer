@@ -6,7 +6,7 @@ var _ = require('lodash'),
     Role = require(libs + 'model/role'),
     log = require(libs + 'log');
 
-function checkOnError(res, err, item, next){
+function checkOnError(res, err, item, next) {
     if (err) {
         res.status(err.code).send({message: err});
     } else if (!item) {
@@ -27,7 +27,6 @@ module.exports = function (app) {
             if (err) {
                 res.send({message: err});
             } else {
-                log.info('Role created');
                 res.status(200).json(role);
             }
         })
@@ -55,10 +54,13 @@ module.exports = function (app) {
     /**
      * Update
      */
-    app.put('/api/role/:id', function (req, res) {
+    app.post('/api/role/:id', function (req, res) {
         Role.findById(req.params.id, function (err, role) {
             checkOnError(res, err, role, function () {
-                role = req.body;
+                role.description = req.body.description;
+                role.name = req.body.name;
+                role.permissions = req.body.permissions;
+                role.weight = req.body.weight;
                 role.save(function (err) {
                     if (err) {
                         res.status(err.code).send({message: err});
@@ -76,9 +78,9 @@ module.exports = function (app) {
         Role.findById(req.params.id, function (err, role) {
             checkOnError(res, err, role, function () {
                 role.remove(function (err) {
-                    if(err){
+                    if (err) {
                         res.status(err.code).send({message: err});
-                    }else{
+                    } else {
                         res.status(200).send({message: 'Role deleted'});
                     }
                 })

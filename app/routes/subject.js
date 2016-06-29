@@ -7,7 +7,7 @@ var _ = require('lodash'),
     Teacher = require(libs + 'model/teacher'),
     log = require(libs + 'log');
 
-function checkOnError(err, item, next) {
+function checkOnError(res, err, item, next) {
     if (err) {
         res.status(err.code).send({message: err});
     } else if (!item) {
@@ -39,7 +39,7 @@ module.exports = function (app) {
      */
     app.get('/api/subjects', function (req, res) {
         Subject.find(function (err, subjects) {
-            checkOnError(err, subjects, function () {
+            checkOnError(res, err, subjects, function () {
                 res.status(200).json(subjects);
             });
         });
@@ -47,7 +47,7 @@ module.exports = function (app) {
 
     app.get('/api/subject/:id', function (req, res) {
         Subject.findById(req.params.id, function (err, subject) {
-            checkOnError(err, subject, function () {
+            checkOnError(res, err, subject, function () {
                 res.status(200).json(subject);
             });
         })
@@ -84,7 +84,7 @@ module.exports = function (app) {
      */
     app.put('/api/subject/:id', function (req, res) {
         Subject.findById(req.params.id, function (err, subject) {
-            checkOnError(err, subject, function () {
+            checkOnError(res, err, subject, function () {
                 subject = req.body;
                 subject.save(function (err) {
                     if (err) {
@@ -101,7 +101,7 @@ module.exports = function (app) {
      */
     app.delete('/api/subject/:id', function (req, res) {
         Subject.findById(req.params.id, function (err, subject) {
-            checkOnError(err, subject, function () {
+            checkOnError(res, err, subject, function () {
                 subject.remove(function (err) {
                     if (err) {
                         res.status(err.code).send({message: err});

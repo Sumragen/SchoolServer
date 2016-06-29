@@ -7,7 +7,7 @@ var _ = require('lodash'),
     User = require(libs + 'model/user'),
     log = require(libs + 'log');
 
-function checkOnError(err, item, next) {
+function checkOnError(res, err, item, next) {
     if (err) {
         res.status(err.code).send({message: err});
     } else if (!item) {
@@ -39,9 +39,9 @@ module.exports = function (app) {
      */
     app.get('/api/teachers', function (req, res) {
         Teacher.find(function (err, teachers) {
-            checkOnError(err, teachers, function () {
+            checkOnError(res, err, teachers, function () {
                 User.find(function (err, users) {
-                    checkOnError(err, users, function () {
+                    checkOnError(res, err, users, function () {
                         var resBody = [];
                         _.each(teachers, function (teacher) {
                             _.every(users, function (user) {
@@ -68,7 +68,7 @@ module.exports = function (app) {
 
     app.get('/api/teacher/:id', function (req, res) {
         Teacher.findById(req.params.id, function (err, teacher) {
-            checkOnError(err, teacher, function () {
+            checkOnError(res, err, teacher, function () {
                 res.status(200).json(teacher);
             });
         })
@@ -79,7 +79,7 @@ module.exports = function (app) {
      */
     app.put('/api/teacher/:id', function (req, res) {
         Teacher.findById(req.params.id, function (err, teacher) {
-            checkOnError(err, teacher, function () {
+            checkOnError(res, err, teacher, function () {
                 teacher = req.body;
                 teacher.save(function (err) {
                     if (err) {
@@ -96,7 +96,7 @@ module.exports = function (app) {
      */
     app.delete('/api/teacher/:id', function (req, res) {
         Teacher.findById(req.params.id, function (err, teacher) {
-            checkOnError(err, teacher, function () {
+            checkOnError(res, err, teacher, function () {
                 teacher.remove(function (err) {
                     if (err) {
                         res.status(err.code).send({message: err});
