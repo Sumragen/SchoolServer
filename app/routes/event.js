@@ -71,6 +71,21 @@ module.exports = function (app) {
             });
         })
     });
+    app.post('/api/events', function (req, res) {
+        Event.remove({}, function (err) {
+            if (err) {
+                res.status(500).send({message: err});
+            } else {
+                Event.collection.insert(req.body, function (err, events) {
+                    if (err) {
+                        res.status(err.code).send({message: err});
+                    } else {
+                        res.status(200).send(events);
+                    }
+                });
+            }
+        });
+    });
     /**
      * Delete
      */
