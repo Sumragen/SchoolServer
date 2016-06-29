@@ -54,7 +54,7 @@ module.exports = function (app) {
     /**
      * Update
      */
-    app.post('/api/role/:id', function (req, res) {
+    app.put('/api/role/:id', function (req, res) {
         Role.findById(req.params.id, function (err, role) {
             checkOnError(res, err, role, function () {
                 role.description = req.body.description;

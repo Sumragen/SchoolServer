@@ -18,7 +18,7 @@
       "Access-Control-Allow-Methods": "POST, GET, PUT, DELETE, OPTIONS",
       "Access-Control-Allow-Origin": "*"
     },
-    "headerSession" : {
+    "headerSession": {
       "name": "x-sessionID",
       "debug": false,
       "root": "/api"
@@ -28,7 +28,7 @@
       "max": 11
     },
     "lesson": {
-      "min" : 0,
+      "min": 0,
       "max": 8
     },
     "role": "student",

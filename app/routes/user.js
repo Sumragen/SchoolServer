@@ -116,8 +116,7 @@ module.exports = function (app) {
     /**
      * Update
      */
-        //post -> put (pre-flight)
-    app.post('/api/user/:id', function (request, response) {
+    app.put('/api/user/:id', function (request, response) {
         if (!request.body) {
             response.status(400);
         } else {

@@ -55,23 +55,24 @@ module.exports = function (app) {
     /**
      * Update
      */
-    app.post('/api/event/:id', function (req, res) {
-        Event.findById(req.params.id, function (err, event) {
-            checkOnError(res, err, event, function () {
-                event.date = new Date(req.body.date);
-                event.description = req.body.description;
-                event.name = req.body.name;
-                event.save(function (err) {
-                    if (err) {
-                        res.status(err.code).send({message: err});
-                    } else {
-                        res.status(200).send(event);
-                    }
-                })
+    app.put('/api/event/:id', function (req, res) {
+        Event.findById(req.params.id)
+            .exec(function (err, event) {
+                checkOnError(res, err, event, function () {
+                    event.date = new Date(req.body.date);
+                    event.description = req.body.description;
+                    event.name = req.body.name;
+                    event.save(function (err) {
+                        if (err) {
+                            res.status(err.code).send({message: err});
+                        } else {
+                            res.status(200).send(event);
+                        }
+                    })
+                });
             });
-        })
     });
-    app.post('/api/events', function (req, res) {
+    app.put('/api/events', function (req, res) {
         Event.remove({}, function (err) {
             if (err) {
                 res.status(500).send({message: err});

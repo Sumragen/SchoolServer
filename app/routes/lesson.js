@@ -160,7 +160,7 @@ module.exports = function (app) {
         })
     }
 
-    app.post('/api/lesson/:id', function (req, res) {
+    app.put('/api/lesson/:id', function (req, res) {
         Lesson.find()
             .exec(function (err, lessons) {
                 var newLesson = _.find(lessons, function (lesson) {

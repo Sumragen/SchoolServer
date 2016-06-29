@@ -105,7 +105,7 @@ module.exports = function (app) {
     /**
      * Update
      */
-    app.post('/api/stage/:id', function (req, res) {
+    app.put('/api/stage/:id', function (req, res) {
         Stage.findById(req.params.id)
             .exec(function (err, stage) {
                 stage.formMaster = req.body.formMaster;
