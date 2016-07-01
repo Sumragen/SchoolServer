@@ -1,7 +1,7 @@
 /**
  * Created by trainee on 6/23/16.
  */
-var p = require('../const.json').permissionSet;
+var p = require(process.cwd() + '/app/const.json').permissionSet;
 var admin = {
     name: 'admin',
     description: 'admin rights',
@@ -25,7 +25,7 @@ var student = {
         p.canEditUser, p.canViewSchedule, p.canViewEvents]
 };
 var roles = [admin, teacher, student];
-function get(){
+function get() {
     return roles;
 }
 exports.get = get;

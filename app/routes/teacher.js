@@ -2,9 +2,9 @@
  * Created by trainee on 6/17/16.
  */
 var _ = require('lodash'),
-    libs = process.cwd() + '/app/libs/',
-    Teacher = require(libs + 'model/teacher'),
-    User = require(libs + 'model/user'),
+    libs = process.cwd() + '/app/',
+    Teacher = require(libs + 'db/model/teacher'),
+    User = require(libs + 'db/model/user'),
     log = require(libs + 'log');
 
 function checkOnError(res, err, item, next) {
@@ -47,12 +47,12 @@ module.exports = function (app) {
                             _.every(users, function (user) {
                                 if (user._id.id == teacher.user.id) {
                                     resBody.push({
-                                        subjects : teacher.subjects,
-                                        user : {
+                                        subjects: teacher.subjects,
+                                        user: {
                                             id: user._id,
                                             name: user.first_name + ' ' + user.last_name
                                         },
-                                        _id : teacher._id
+                                        _id: teacher._id
                                     });
                                     return false;
                                 }

@@ -1,10 +1,10 @@
 /**
  * Created by trainee on 6/7/16.
  */
-var libs = process.cwd() + '/app/libs/',
-    UserModel = require(libs + 'model/user'),
-    AccessTokenModel = require(libs + 'model/accessToken'),
-    RefreshTokenModel = require(libs + 'model/refreshToken'),
+var libs = process.cwd() + '/app/',
+    UserModel = require(libs + 'db/model/user'),
+    AccessTokenModel = require(libs + 'db/model/accessToken'),
+    RefreshTokenModel = require(libs + 'db/model/refreshToken'),
     config = require(libs + 'config'),
     oauth2orize = require('oauth2orize'),
     passport = require('passport');

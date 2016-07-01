@@ -2,8 +2,8 @@
  * Created by trainee on 6/9/16.
  */
 var _ = require('lodash'),
-    libs = process.cwd() + '/app/libs/',
-    Event = require(libs + 'model/event'),
+    libs = process.cwd() + '/app/',
+    Event = require(libs + 'db/model/event'),
     log = require(libs + 'log');
 
 function checkOnError(res, err, item, next) {

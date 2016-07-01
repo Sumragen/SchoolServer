@@ -2,9 +2,9 @@
  * Created by trainee on 6/9/16.
  */
 var _ = require('lodash'),
-    libs = process.cwd() + '/app/libs/',
-    Lesson = require(libs + 'model/lesson'),
-    Stage = require(libs + 'model/stage'),
+    libs = process.cwd() + '/app/',
+    Lesson = require(libs + 'db/model/lesson'),
+    Stage = require(libs + 'db/model/stage'),
     log = require(libs + 'log');
 
 function checkOnError(res, err, item, next) {

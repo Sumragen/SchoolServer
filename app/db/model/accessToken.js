@@ -1,7 +1,7 @@
 /**
  * Created by trainee on 6/7/16.
  */
-var libs = process.cwd() + '/app/libs/',
+var libs = process.cwd() + '/app/',
     mongoose = require(libs + 'db/mongoose'),
     Schema = mongoose.Schema;
 

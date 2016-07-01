@@ -3,7 +3,7 @@
  */
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema,
-    config = require('./../config');
+    config = require(process.cwd() + '/app/config');
 
 /**
  * ------ Model -----
@@ -25,28 +25,28 @@ var mongoose = require('mongoose'),
 
 var Lesson = new Schema({
     subject: {
-        type : Schema.Types.ObjectId,
-        ref : 'Subject',
+        type: Schema.Types.ObjectId,
+        ref: 'Subject',
         default: new mongoose.Types.ObjectId
     },
     teacher: {
         type: Schema.Types.ObjectId,
-        ref : 'Teacher',
+        ref: 'Teacher',
         default: new mongoose.Types.ObjectId
     },
-    stage : {
+    stage: {
         type: Schema.Types.ObjectId,
-        ref : 'Stage',
-        default : new mongoose.Types.ObjectId
+        ref: 'Stage',
+        default: new mongoose.Types.ObjectId
     },
-    classroom : {
+    classroom: {
         type: Number,
         required: true
     },
     day: {
         type: String,
         enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-        required : true
+        required: true
     },
     order: {
         type: Number,

@@ -4,7 +4,7 @@
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema,
     Teacher = require('./teacher'),
-    config = require('./../config');
+    config = require(process.cwd() + '/app/config');
 
 
 /**

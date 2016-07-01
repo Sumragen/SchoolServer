@@ -2,7 +2,7 @@
  * Created by trainee on 6/7/16.
  */
 var mongoose = require('mongoose'),
-    libs = process.cwd() + '/app/libs/',
+    libs = process.cwd() + '/app/',
     log = require(libs + 'log')(module),
     config = require(libs + 'config');
 

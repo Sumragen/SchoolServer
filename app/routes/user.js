@@ -2,11 +2,11 @@
  * Created by trainee on 6/9/16.
  */
 var _ = require('lodash'),
-    libs = process.cwd() + '/app/libs/',
-    User = require(libs + 'model/user'),
-    Role = require(libs + 'model/role'),
-    Stage = require(libs + 'model/stage'),
-    Teacher = require(libs + 'model/teacher'),
+    libs = process.cwd() + '/app/',
+    User = require(libs + 'db/model/user'),
+    Role = require(libs + 'db/model/role'),
+    Stage = require(libs + 'db/model/stage'),
+    Teacher = require(libs + 'db/model/teacher'),
     log = require(libs + 'log')(module),
     config = require(libs + 'config');
 

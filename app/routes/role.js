@@ -2,8 +2,8 @@
  * Created by trainee on 6/9/16.
  */
 var _ = require('lodash'),
-    libs = process.cwd() + '/app/libs/',
-    Role = require(libs + 'model/role'),
+    libs = process.cwd() + '/app/',
+    Role = require(libs + 'db/model/role'),
     log = require(libs + 'log');
 
 function checkOnError(res, err, item, next) {

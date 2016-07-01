@@ -10,12 +10,11 @@ var http = require('http'),
     headerSession = require('node-header-session'),
     morgan = require('morgan'),
     passport = require('passport'),
-    libs = process.cwd() + '/app/libs/',
     router = require('./router'),
-    config = require(libs + 'config'),
-    oauth2 = require(libs + 'auth/oauth2'),
+    config = require('./config'),
+    oauth2 = require('./auth/oauth2'),
     accessControl = require('./auth/accessControl'),
-    log = require(libs + 'log')(module);
+    log = require('./log')(module);
 
 var port = config.get('port');
 var host = config.get('host');

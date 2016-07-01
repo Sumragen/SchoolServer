@@ -4,32 +4,34 @@
 var faker = require('faker');
 var _ = require('lodash');
 
-var libs = process.cwd() + '/app/libs/';
+var libs = process.cwd() + '/app/';
+
+// models
+var db = libs + 'db/model/',
+    User = require(db + 'user'),
+    Role = require(db + 'role'),
+    Event = require(db + 'event'),
+    Lesson = require(db + 'lesson'),
+    Stage = require(db + 'stage'),
+    Subject = require(db + 'subject'),
+    Teacher = require(db + 'teacher'),
+    Client = require(db + 'client'),
+    AccessToken = require(db + 'accessToken'),
+    RefreshToken = require(db + 'refreshToken');
+
 
 var log = require(libs + 'log')(module),
     db = require(libs + 'db/mongoose'),
     config = require(libs + 'config'),
     consts = require('./const.json');
 
-// models
-var User = require(libs + 'model/user'),
-    Role = require(libs + 'model/role'),
-    Event = require(libs + 'model/event'),
-    Lesson = require(libs + 'model/lesson'),
-    Stage = require(libs + 'model/stage'),
-    Subject = require(libs + 'model/subject'),
-    Teacher = require(libs + 'model/teacher'),
-    Client = require(libs + 'model/client'),
-    AccessToken = require(libs + 'model/accessToken'),
-    RefreshToken = require(libs + 'model/refreshToken');
-
 //default data
-var roles = require('./data/roles').get(),
-    users = require('./data/users').get(),
-    events = require('./data/events').get(),
-    lessons = require('./data/lessons').get(),
-    stages = require('./data/stages').get(),
-    subjects = require('./data/subjects').get();
+var roles = require('./db/data/roles').get(),
+    users = require('./db/data/users').get(),
+    events = require('./db/data/events').get(),
+    lessons = require('./db/data/lessons').get(),
+    stages = require('./db/data/stages').get(),
+    subjects = require('./db/data/subjects').get();
 
 var order = {
     'Role': 1,
@@ -104,7 +106,7 @@ setOrder('Lesson', function () {
                 if (!err) {
                     Subject.find()
                         .exec(function (err, subjects) {
-                            if(!err){
+                            if (!err) {
                                 Teacher.find(function (err, teachers) {
                                     _.each(lessons, function (data, index) {
                                         var lesson = new Lesson(data);
