@@ -97,7 +97,7 @@ module.exports = function (app) {
                     if (err) {
                         res.status(err.code).send({message: err});
                     } else {
-                        res.status(200).send({message: 'Event deleted'});
+                        res.status(200).send(event);
                     }
                 })
             });
