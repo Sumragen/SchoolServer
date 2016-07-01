@@ -52,7 +52,7 @@ module.exports = function (app) {
     /**
      * Create
      */
-        //register
+    //register
     app.post('/api/user/add', function (request, response) {
         var user = new User(request.body);
         Role.findOne({name: config.get('default:role')}, function (err, role) {
@@ -84,7 +84,7 @@ module.exports = function (app) {
     /**
      * Read
      */
-        // List
+    // List
     app.get('/api/users', function (request, response) {
         User.find(function (err, users) {
             if (err || !users) {
@@ -144,15 +144,12 @@ module.exports = function (app) {
                                                     if (err) {
                                                         response.status(500).send({message: err});
                                                     } else {
-                                                        var subjects = _.map(reqBody.subjects, function (subject) {
-                                                            return subject.id;
-                                                        });
                                                         if (teacher) {
-                                                            teacher.subjects = subjects;
+                                                            teacher.subjects = reqBody.subjects;
                                                         } else {
                                                             teacher = new Teacher({
                                                                 user: user._id,
-                                                                subjects: subjects
+                                                                subjects: reqBody.subjects
                                                             });
                                                         }
                                                         teacher.save(function (err) {
