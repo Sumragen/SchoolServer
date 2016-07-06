@@ -1,5 +1,5 @@
 # SchoolServer
-Server for [School API](https://github.com/Sumragen/site).
+Server for [School UI](https://github.com/Sumragen/site).
 Based on [NodeJS](https://nodejs.org/en/) with [Express](http://expressjs.com/).
 
 ## Data Base
